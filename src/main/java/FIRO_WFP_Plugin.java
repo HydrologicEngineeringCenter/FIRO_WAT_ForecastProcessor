@@ -26,10 +26,10 @@ import java.util.List;
  * @author WatPowerUser
  */
 public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alternative> implements CreatableWatPlugin, OutputPlugin  {
-    public static final String PluginName = "RASCAL";
+    public static final String PluginName = "FIRO_WFP";
     private static final String _pluginVersion = "1.0.1";
-    private static final String _pluginSubDirectory = "RASCAL";
-    private static final String _pluginExtension = ".RASCAL";
+    private static final String _pluginSubDirectory = "FIRO_WFP";
+    private static final String _pluginExtension = ".FIROWFP";
     /**
      * @param args the command line arguments
      */
