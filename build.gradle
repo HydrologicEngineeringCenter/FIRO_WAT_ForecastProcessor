@@ -1,9 +1,6 @@
 plugins {
     id 'java'
 }
-
-
-
 //Dependency Management
 repositories {
     mavenCentral()
@@ -14,7 +11,6 @@ repositories {
         url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
     }
 }
-
 dependencies {
     implementation "org.junit.jupiter:junit-jupiter:5.4.2"
     implementation name: "hec"
@@ -28,7 +24,6 @@ dependencies {
     implementation 'mil.army.usace.hec:javaHeclib:7-HZ-win-x64@zip'
     implementation 'org.apache.commons:commons-lang3:3.11'
 }
-
 //Testing
 test{
     useJUnitPlatform()
@@ -45,7 +40,6 @@ tasks.withType(Test) {
     jvmArgs "--enable-preview"
 }
 
-/*
 //Publishing
 group 'mil.army.usace.hec'
 version '1.0-SNAPSHOT'
@@ -54,6 +48,6 @@ jar {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
     manifest {
-        attributes "WatPluginMainClass": "RASCALPlugin"
+        attributes "WatPluginMainClass": "FIRO_WFP_Plugin"
     }
-}*/
+}
