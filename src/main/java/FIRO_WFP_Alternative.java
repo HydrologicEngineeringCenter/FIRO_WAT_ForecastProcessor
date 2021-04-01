@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private String _pluginVersion;
-    private static final String DocumentRoot = "RASFailureFinderAlternative";
+    private static final String DocumentRoot = "FIRO_WFP_Alternative";
     private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
@@ -106,7 +106,11 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return true;
     }
     boolean computeOutputVariables(List<OutputVariable> list) {
-        if (list.size() == 0){
+/*
+
+ This is where the RAsCAL Logic really existed. The rest is mostly boilerplate. Left the old code in comments for reference,
+  but can be safely deleted.
+ if (list.size() == 0){
             return true;
         }
         String rasComputeMessagesFile = "Trinity_WAT.p05.computeMsgs.txt";
@@ -128,7 +132,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             else{
                 oimpl.setValue(0.0);
             }
-        }
+        }*/
         return true;
     }
 }

@@ -40,7 +40,7 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
         super();
         setName(PluginName);
         setProgramOrderItem(new ProgramOrderItem(PluginName,
-                "A plugin to determine RAS failures and write them as an output variable",
+                "A plugin to process forecast data for WAT",
                 false,1,"shortname","Images/fda/wsp.png"));
         WatPluginManager.register(this);
     }
