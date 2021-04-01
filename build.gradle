@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+}
+
+
+
+//Dependency Management
+repositories {
+    mavenCentral()
+    flatDir{
+        dirs ("lib")
+    }
+    maven {
+        url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
+    }
+}
+
+dependencies {
+    implementation "org.junit.jupiter:junit-jupiter:5.4.2"
+    implementation name: "hec"
+    implementation name: "hecnf"
+    implementation name: "hecnfPlugin"
+    implementation name: "jdom-1.0"
+    implementation name: "rma"
+    implementation name: "rmadev"
+    implementation name: "wat"
+    implementation name: "watModel"
+    implementation 'mil.army.usace.hec:javaHeclib:7-HZ-win-x64@zip'
+    implementation 'org.apache.commons:commons-lang3:3.11'
+}
+
+//Testing
+test{
+    useJUnitPlatform()
+    testLogging{
+        test {
+            testLogging {
+                events "PASSED","FAILED", "SKIPPED"
+            }
+        }
+    }
+}
+tasks.withType(Test) {
+    useJUnitPlatform()
+    jvmArgs "--enable-preview"
+}
+
+/*
+//Publishing
+group 'mil.army.usace.hec'
+version '1.0-SNAPSHOT'
+
+jar {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    manifest {
+        attributes "WatPluginMainClass": "RASCALPlugin"
+    }
+}*/
