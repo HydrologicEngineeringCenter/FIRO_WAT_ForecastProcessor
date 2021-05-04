@@ -17,10 +17,10 @@ dependencies {
     implementation name: "hecnf"
     implementation name: "hecnfPlugin"
     implementation 'org.jdom:jdom:1.1'
-    implementation name: "rma"
-    implementation name: "rmadev"
-    implementation name: "wat"
-    implementation name: "watModel"
+    implementation 'mil.army.usace.hec.wat:wat-rma:dev-3.0.0.1855-20210504.180620-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-rmadev:dev-3.0.0.1835-20210428.180523-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat:dev-3.0.0.1855-20210504.180549-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-model:dev-3.0.0.1855-20210504.180555-1@jar'
     implementation 'mil.army.usace.hec:javaHeclib:7-HZ-win-x64@zip'
     implementation 'org.apache.commons:commons-lang3:3.11'
 }
