@@ -5,11 +5,14 @@
  */
 
 import com.rma.io.RmaFile;
+import hec.JdbcTimeSeriesDatabase;
+import hec.TimeSeriesDatabase;
 import hec.data.Parameter;
 import hec.model.OutputVariable;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import hec2.wat.model.tracking.OutputVariableImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -66,6 +69,14 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     @Override
     public boolean compute() {
+        String dssName = _computeOptions.getDssFilename();
+        String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
+        try {
+            TimeSeriesDatabase db = new JdbcTimeSeriesDatabase(databaseName, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
     @Override
@@ -106,33 +117,5 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return true;
     }
     boolean computeOutputVariables(List<OutputVariable> list) {
-/*
-
- This is where the RAsCAL Logic really existed. The rest is mostly boilerplate. Left the old code in comments for reference,
-  but can be safely deleted.
- if (list.size() == 0){
-            return true;
-        }
-        String rasComputeMessagesFile = "Trinity_WAT.p05.computeMsgs.txt";
-        hec2.wat.model.ComputeOptions wco = (hec2.wat.model.ComputeOptions)_computeOptions;
-        String dssFilePath = wco.getDssFilename();
-        String[] splitFilePath = dssFilePath.split("\\\\");
-        String baseDirectory = "";
-        for(int i = 0; i<splitFilePath.length - 1; i++){
-            baseDirectory += (splitFilePath[i] + "\\");
-        }
-
-        String rasDirectory = baseDirectory + "\\event "+wco.getCurrentEventNumber() + "\\RAS\\";
-        boolean fail = RASComputeFailureChecker.CheckForSolutionSolverFailed(rasDirectory+rasComputeMessagesFile);
-        for(OutputVariable o : list){
-            OutputVariableImpl oimpl = (OutputVariableImpl)o;
-            if(fail){
-                oimpl.setValue(1.0);
-            }
-            else{
-                oimpl.setValue(0.0);
-            }
-        }*/
-        return true;
-    }
+            return true; }
 }
