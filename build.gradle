@@ -19,8 +19,9 @@ dependencies {
     implementation name: "FIRO_TSEnsembles"
     implementation "org.junit.jupiter:junit-jupiter:5.4.2"
     implementation name: "hec"
-    implementation name: "hecnf"
-    implementation name: "hecnfPlugin"
+    //implementation 'mil.army.usace.hec.wat:wat-hec:v1.1-1.1.0.585-20210428.205116-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-hecnf:dev-3.0.0.1855-20210504.180601-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-hecnf-pluginapi:dev-3.0.0.1855-20210504.180607-1@jar'
     implementation 'org.jdom:jdom:1.1'
     implementation 'mil.army.usace.hec.wat:wat-rma:dev-3.0.0.1855-20210504.180620-1@jar'
     implementation 'mil.army.usace.hec.wat:wat-rmadev:dev-3.0.0.1855-20210504.180626-1@jar'
