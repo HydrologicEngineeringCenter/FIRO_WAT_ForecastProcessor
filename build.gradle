@@ -18,8 +18,8 @@ repositories {
 dependencies {
     implementation name: "FIRO_TSEnsembles"
     implementation "org.junit.jupiter:junit-jupiter:5.4.2"
-    implementation name: "hec"
-    //implementation 'mil.army.usace.hec.wat:wat-hec:v1.1-1.1.0.585-20210428.205116-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-hec-maps:dev-3.0.0.1856-20210504.234927-1@jar'
+    implementation 'mil.army.usace.hec.wat:wat-hec:dev-3.0.0.1855-20210504.180613-1@jar'
     implementation 'mil.army.usace.hec.wat:wat-hecnf:dev-3.0.0.1855-20210504.180601-1@jar'
     implementation 'mil.army.usace.hec.wat:wat-hecnf-pluginapi:dev-3.0.0.1855-20210504.180607-1@jar'
     implementation 'org.jdom:jdom:1.1'
