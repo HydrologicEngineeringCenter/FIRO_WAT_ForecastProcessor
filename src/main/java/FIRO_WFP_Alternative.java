@@ -13,12 +13,11 @@ import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.TimeSeriesIdentifier;
 import hec.model.OutputVariable;
-import hec.stats.MaxAvgDuration;
+import hec.stats.*;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import hec2.wat.client.WatFrame;
 import hec2.wat.model.tracking.OutputVariableImpl;
-import org.apache.commons.lang3.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -87,14 +86,13 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             WatFrame fr = hec2.wat.WAT.getWatFrame();
             fr.addMessage("We got the ensemble data!");
 
-            /*MaxAvgDuration test = new MaxAvgDuration(5);
+            hec.stats.Computable test = new MeanComputable();
             float[] output = ensemble.iterateForTracesAcrossTime(test);
-            WatFrame fr = hec2.wat.WAT.getWatFrame();
-            fr.addMessage("This is an output from the Across Time Calculation" + output[0] );
+            fr.addMessage("This is the mean across time for the first trace: " + output[0] );
 
-            MaxAvgDuration test2 = new MaxAvgDuration((2));
+            hec.stats.Computable test2 = new MeanComputable();
             float[] output2 = ensemble.iterateForTimeAcrossTraces(test2);
-            fr.addMessage("This is an output from the Across Traces Calculation " + output2[0]);*/
+            fr.addMessage("This is mean across traces for the first timestep: " + output2[0]);
 
 
         } catch (Exception e) {
