@@ -78,7 +78,15 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
     }
     @Override
     public List<DataLocation> getDataLocations(ModelAlternative ma, int i) {
-        return null;
+        FIRO_WFP_Alternative alt = getAlt(ma);
+        if(alt==null)return null;
+        if(DataLocation.INPUT_LOCATIONS == i){
+            //input
+            return alt.getInputDataLocations();
+        }else{
+            //ouput
+            return alt.getOutputDataLocations();
+        }
     }
     @Override
     public boolean setDataLocations(ModelAlternative ma, List<DataLocation> list) throws ModelLinkingException {

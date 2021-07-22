@@ -5,15 +5,14 @@
  */
 
 import com.rma.io.RmaFile;
-import com.rma.model.Computable;
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
+/*import hec.JdbcTimeSeriesDatabase;
+import hec.TimeSeriesDatabase;*/
 import hec.data.Parameter;
-import hec.ensemble.Ensemble;
+/*import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.ensemble.TimeSeriesIdentifier;*/
 import hec.model.OutputVariable;
-import hec.stats.*;
+import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import hec2.wat.client.WatFrame;
@@ -31,6 +30,8 @@ import java.util.List;
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private String _pluginVersion;
+    List<DataLocation> _inputDataLocations;
+    List<DataLocation> _outputDataLocations ;
     private static final String DocumentRoot = "FIRO_WFP_Alternative";
     private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
@@ -44,6 +45,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         this();
         setName(name);
     }
+
     @Override
     protected boolean loadDocument(org.jdom.Document dcmnt) {
         if(dcmnt!=null){
@@ -59,6 +61,19 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 System.out.println("XML document root was imporoperly named.");
                 return false;
             }
+
+            if(_inputDataLocations ==null){
+                _inputDataLocations = new ArrayList<>();
+            }
+            _inputDataLocations.clear();
+            loadDataLocations(ele, _inputDataLocations);
+
+            if(_outputDataLocations ==null){
+                _outputDataLocations = new ArrayList<>();
+            }
+            _outputDataLocations.clear();
+            loadOutputDataLocations(ele, _outputDataLocations);
+
             setModified(false);
             return true;
         }else{
@@ -75,7 +90,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     @Override
     public boolean compute() {
-        String dssName = _computeOptions.getDssFilename();
+        return false;
+/*        String dssName = _computeOptions.getDssFilename();
         String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
         try {
             TimeSeriesDatabase database = new JdbcTimeSeriesDatabase(databaseName, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
@@ -100,6 +116,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
 
         return true;
+    */
     }
     @Override
     public boolean cancelCompute() {
@@ -120,11 +137,18 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             Element root = new Element(DocumentRoot);
             root.setAttribute(AlternativeNameAttribute,getName());
             root.setAttribute(AlternativeDescriptionAttribute,getDescription());
+            if(_inputDataLocations!=null) {
+                saveDataLocations(root, _inputDataLocations);
+            }
+            if(_outputDataLocations!=null) {
+                saveOutputDataLocations(root, _outputDataLocations);
+            }
             Document doc = new Document(root);
             return writeXMLFile(doc,file);
         }
         return false;
     }
+
     public List<OutputVariable> getOutputVariables(){
         OutputVariableImpl oimpl = new OutputVariableImpl();
         oimpl.setName("RAS Compute Failures");
@@ -138,5 +162,43 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return true;
     }
     boolean computeOutputVariables(List<OutputVariable> list) { return true; }
+
+    public List<DataLocation> getInputDataLocations(){
+        //construct input data locations.
+        if(_inputDataLocations==null ||_inputDataLocations.isEmpty()){
+            _inputDataLocations = defaultInputDataLocations();
+        }
+            return _inputDataLocations;
+    }
+
+    public List<DataLocation> defaultInputDataLocations() {
+        List<DataLocation> dlList = new ArrayList<>();
+        //create datalocations for each location of interest, so that it can be linked to output from other models.
+
+        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook","Ensemble");
+        dlList.add(KanatockEnsemble);
+
+
+        return dlList;
+    }
+
+    public List<DataLocation> getOutputDataLocations(){
+        //construct input data locations.
+        if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
+            _outputDataLocations = defaultOutputDataLocations();
+        }
+        return _outputDataLocations;
+    }
+
+    public List<DataLocation> defaultOutputDataLocations() {
+        List<DataLocation> dlList = new ArrayList<>();
+        //create datalocations for each location of interest, so that it can be linked to output from other models.
+
+        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook","MaxTS");
+        dlList.add(KanatockEnsemble);
+
+        return dlList;
+    }
+
 
 }
