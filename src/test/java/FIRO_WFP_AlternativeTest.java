@@ -28,7 +28,7 @@ class FIRO_WFP_AlternativeTest {
     void saveData() {
         _alt.getInputDataLocations();
         _alt.getOutputDataLocations();
-        RmaFile rf = new RmaFile("src/test/resources/savedata.test");
+        RmaFile rf = new RmaFile("src/test/resources/savedata.xml");
         _alt.saveData(rf);
     }
 
@@ -37,7 +37,7 @@ class FIRO_WFP_AlternativeTest {
         FIRO_WFP_Alternative tmpAlt = new FIRO_WFP_Alternative();
         SAXBuilder sax = new SAXBuilder();
         // XML is a local file
-        Document doc = sax.build(new File("src/test/resources/savedata.test"));
+        Document doc = sax.build(new File("src/test/resources/savedata.xml"));
         tmpAlt.loadDocument(doc);
     }
 
