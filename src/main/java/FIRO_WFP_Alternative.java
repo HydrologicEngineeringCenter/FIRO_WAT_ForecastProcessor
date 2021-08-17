@@ -5,13 +5,20 @@
  */
 
 import com.rma.io.RmaFile;
-/*import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;*/
+import hec.JdbcTimeSeriesDatabase;
+import hec.TimeSeriesDatabase;
+import hec.JdbcTimeSeriesDatabase;
+import hec.TimeSeriesDatabase;
 import hec.data.Parameter;
-/*import hec.ensemble.Ensemble;
+import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
-import hec.ensemble.TimeSeriesIdentifier;*/
+import hec.ensemble.TimeSeriesIdentifier;
+import hec.ensemble.Ensemble;
+import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.TimeSeriesIdentifier;
 import hec.model.OutputVariable;
+import hec.model.RunTimeWindow;
+import hec.stats.MeanComputable;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
@@ -37,6 +44,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private ComputeOptions _computeOptions;
+    private List< > _outputVariables;
     public FIRO_WFP_Alternative(){
         super();
     }
@@ -88,35 +96,69 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public boolean isComputable() {
         return true;
     }
-    @Override
-    public boolean compute() {
-        return false;
-/*        String dssName = _computeOptions.getDssFilename();
+
+    private boolean computeForTimeWindow(RunTimeWindow rtw){
+        String dssName;
+        dssName = _computeOptions.getDssFilename();
         String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
+
         try {
             TimeSeriesDatabase database = new JdbcTimeSeriesDatabase(databaseName, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
-            TimeSeriesIdentifier timeSeriesIdentifier = new TimeSeriesIdentifier("Coyote.fake_forecast", "flow");
+            //  loop on input data locations
+            // determine location and parameter to create timeseries identifier from an input data location
+            TimeSeriesIdentifier timeSeriesIdentifier = new TimeSeriesIdentifier(_inputDataLocations.get(0).getName(), _inputDataLocations.get(0).getParameter());
             EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
+            // Use the timewindow  rtw to iterate over issuance dates
+            //we now need to use the timewindow of the event and map to issuance dates in the database
             List<ZonedDateTime> issueDates = ensembleTimeSeries.getIssueDates();
-            Ensemble ensemble = database.getEnsemble(timeSeriesIdentifier,issueDates.get(0));
-            WatFrame fr = hec2.wat.WAT.getWatFrame();
-            fr.addMessage("We got the ensemble data!");
 
-            hec.stats.Computable test = new MeanComputable();
-            float[] output = ensemble.iterateForTracesAcrossTime(test);
-            fr.addMessage("This is the mean across time for the first trace: " + output[0] );
+            int timeStepsInWindow = rtw.getNumSteps();
+            for(int count = 0; count<timeStepsInWindow; count++){
 
-            hec.stats.Computable test2 = new MeanComputable();
-            float[] output2 = ensemble.iterateForTimeAcrossTraces(test2);
-            fr.addMessage("This is mean across traces for the first timestep: " + output2[0]);
+            }
 
+            //create an ensemble for each issue date. For loop
+            for(int i = 0; i < issueDates.size(); i++){
+                Ensemble ensemble = database.getEnsemble(timeSeriesIdentifier,issueDates.get(0));
+                WatFrame fr = hec2.wat.WAT.getWatFrame();
+                fr.addMessage("We got the ensemble data!");
+
+                for(int j = 0; j<_outputDataLocations.size(); j++){
+                    //from output data locations determine computes we need to perform for each output data location at this location
+                    //check for location, compute type, store data
+                    if (_outputDataLocations.get(j).getComputeType().equals("MeanAcrossTime")){
+                        hec.stats.Computable stat = new MeanComputable();
+                        float[] output = ensemble.iterateForTracesAcrossTime(stat);
+                        fr.addMessage("This is the mean across time for the first trace: " + output[0] );
+                    }
+                    if (_outputDataLocations.get(j).getComputeType(),equals("MeanAcrossTraces")){
+                        hec.stats.Computable test2 = new MeanComputable();
+                        float[] output2 = ensemble.iterateForTimeAcrossTraces(test2);
+                        fr.addMessage("This is mean across traces for the first timestep: " + output2[0]);
+
+                }
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return true;
-    */
+    }
+
+    @Override
+    public boolean compute() {
+        String dssName;
+        dssName = _computeOptions.getDssFilename();
+        String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
+        hec2.wat.model.ComputeOptions wco;
+        if(_computeOptions instanceof hec2.wat.model.ComputeOptions) {
+            wco = (hec2.wat.model.ComputeOptions) _computeOptions;
+            RunTimeWindow rtw = wco.getEventList().get(wco.getCurrentEventNumber());
+            return computeForTimeWindow(rtw);
+        } else{
+            return false;
+        }
     }
     @Override
     public boolean cancelCompute() {
@@ -150,16 +192,18 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
 
     public List<OutputVariable> getOutputVariables(){
-        OutputVariableImpl oimpl = new OutputVariableImpl();
-        oimpl.setName("RAS Compute Failures");
-        oimpl.setDescription("Finds RAS Compute Failures");
-        oimpl.setParamId(Parameter.PARAMID_COUNT);
-        List<OutputVariable> ret = new ArrayList<>();
-            ret.add(oimpl);
-        return ret;
+        return _outputVariables;
     }
     public boolean hasOutputVariables(){
-        return true;
+        if (_outputVariables != null){
+            if(_outputVariables.size() == 0){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return false;
+        }
     }
     boolean computeOutputVariables(List<OutputVariable> list) { return true; }
 
