@@ -5,7 +5,6 @@ import org.jdom.input.SAXBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import rma.util.RMAFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +20,6 @@ class FIRO_WFP_AlternativeTest {
         _alt = new FIRO_WFP_Alternative("myName");
         _alt.setDescription("myDescription");
         _alt.setFile(rf);
-
     }
 
     @Test
@@ -29,7 +27,7 @@ class FIRO_WFP_AlternativeTest {
         _alt.getInputDataLocations();
         _alt.getOutputDataLocations();
         RmaFile rf = new RmaFile("src/test/resources/savedata.xml");
-        _alt.saveData(rf);
+        assertTrue(_alt.saveData(rf));
     }
 
     @Test
@@ -38,7 +36,7 @@ class FIRO_WFP_AlternativeTest {
         SAXBuilder sax = new SAXBuilder();
         // XML is a local file
         Document doc = sax.build(new File("src/test/resources/savedata.xml"));
-        tmpAlt.loadDocument(doc);
+        assertTrue(tmpAlt.loadDocument(doc));
     }
 
 
