@@ -7,26 +7,20 @@
 import com.rma.io.RmaFile;
 import hec.JdbcTimeSeriesDatabase;
 import hec.TimeSeriesDatabase;
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
-import hec.data.Parameter;
-import hec.ensemble.Ensemble;
-import hec.ensemble.EnsembleTimeSeries;
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.stats.*;
 import hec.ensemble.Ensemble;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.TimeSeriesIdentifier;
 import hec.model.OutputVariable;
 import hec.model.RunTimeWindow;
-import hec.stats.MaxAvgDuration;
+
 import hec.stats.MeanComputable;
 import hec.stats.MedianComputable;
-import hec.stats.MinComputable;
+
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import hec2.wat.client.WatFrame;
-import hec2.wat.model.tracking.OutputVariableImpl;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -52,52 +46,31 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         super();
     }
     public FIRO_WFP_Alternative(String name){
-
         this();
         setName(name);
     }
 
-    @Override
-    protected boolean loadDocument(org.jdom.Document dcmnt) {
-        if(dcmnt!=null){
-            org.jdom.Element ele = dcmnt.getRootElement();
-            if(ele==null){
-                System.out.println("No root element on the provided XML document.");
-                return false;
-            }
-            if(ele.getName().equals(DocumentRoot)){
-                setName(ele.getAttributeValue(AlternativeNameAttribute));
-                setDescription(ele.getAttributeValue(AlternativeDescriptionAttribute));
-            }else{
-                System.out.println("XML document root was imporoperly named.");
-                return false;
-            }
-
-            if(_inputDataLocations ==null){
-                _inputDataLocations = new ArrayList<>();
-            }
-            _inputDataLocations.clear();
-            loadDataLocations(ele, _inputDataLocations);
-
-            if(_outputDataLocations ==null){
-                _outputDataLocations = new ArrayList<>();
-            }
-            _outputDataLocations.clear();
-            loadOutputDataLocations(ele, _outputDataLocations);
-
-            setModified(false);
-            return true;
-        }else{
-            System.out.println("XML document was null.");
-            return false;
-        }
-    }
     public void setComputeOptions(ComputeOptions opts){
         _computeOptions = opts;
     }
     @Override
     public boolean isComputable() {
         return true;
+    }
+
+    @Override
+    public boolean compute() {
+        String dssName;
+        dssName = _computeOptions.getDssFilename();
+        String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
+        hec2.wat.model.ComputeOptions wco;
+        if(_computeOptions instanceof hec2.wat.model.ComputeOptions) {
+            wco = (hec2.wat.model.ComputeOptions) _computeOptions;
+            RunTimeWindow rtw = wco.getEventList().get(wco.getCurrentEventNumber());
+            return computeForTimeWindow(rtw);
+        } else{
+            return false;
+        }
     }
 
     private boolean computeForTimeWindow(RunTimeWindow rtw){
@@ -117,7 +90,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 int timeStepsInWindow = rtw.getNumSteps();
                 String rtwStartTime = rtw.getStartTimeString();
                 List<ZonedDateTime> issueDates = ensembleTimeSeries.getIssueDates();
-                int startingIndex = issueDates.indexOf(rtwStartTime); //This won't work. Not the right type. Need to figure out how to convert
+                int startingIndex = issueDates.indexOf(ZonedDateTime.parse(rtwStartTime)); //This needs testing.
 
                 //create an ensemble for each issue date. For loop
                 for(int i = startingIndex; i <= timeStepsInWindow; i++){
@@ -125,21 +98,21 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                     WatFrame fr = hec2.wat.WAT.getWatFrame();
                     fr.addMessage("We got the ensemble data!");
 
-                    for(int j = 0; j<_outputDataLocations.size(); j++){
+                    for (DataLocation outputDataLocation : _outputDataLocations) {
                         //from output data locations determine computes we need to perform for each output data location at this location
                         //check for location, compute type, store data
-                        boolean isCorrectInputLocation = _inputDataLocations.get(k).equals(_outputDataLocations.get(j));
+                        boolean isCorrectInputLocation = _inputDataLocations.get(k).equals(outputDataLocation);
 
-                        if (_outputDataLocations.get(j).getComputeType().toString().equals(EnsembleComputeTypes.Mean.toString()) && isCorrectInputLocation){
-                            hec.stats.Computable stat = new MeanComputable();
+                        if (outputDataLocation.getComputeType().toString().equals(EnsembleComputeTypes.Mean.toString()) && isCorrectInputLocation) {
+                            Computable stat = new MeanComputable();
                             float[] output = ensemble.iterateForTimeAcrossTraces(stat);
-                            fr.addMessage("This is the mean across time for the first trace: " + output[0] );
+                            fr.addMessage("This is the mean across time for the first trace: " + output[0]);
+
                         }
-                        if (_outputDataLocations.get(j).getComputeType().toString().equals(EnsembleComputeTypes.Median.toString()) && isCorrectInputLocation){
-                            hec.stats.Computable test2 = new MedianComputable();
+                        if (outputDataLocation.getComputeType().toString().equals(EnsembleComputeTypes.Median.toString()) && isCorrectInputLocation) {
+                            Computable test2 = new MedianComputable();
                             float[] output2 = ensemble.iterateForTimeAcrossTraces(test2);
                             fr.addMessage("This is mean across traces for the first timestep: " + output2[0]);
-
                         }
                     }
                 }
@@ -150,21 +123,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             e.printStackTrace();
         }
         return true;
-    }
-
-    @Override
-    public boolean compute() {
-        String dssName;
-        dssName = _computeOptions.getDssFilename();
-        String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
-        hec2.wat.model.ComputeOptions wco;
-        if(_computeOptions instanceof hec2.wat.model.ComputeOptions) {
-            wco = (hec2.wat.model.ComputeOptions) _computeOptions;
-            RunTimeWindow rtw = wco.getEventList().get(wco.getCurrentEventNumber());
-            return computeForTimeWindow(rtw);
-        } else{
-            return false;
-        }
     }
     @Override
     public boolean cancelCompute() {
@@ -181,10 +139,10 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     @Override
     public boolean saveData(RmaFile file){
         if(file!=null){
-            //used to be sElement
             Element root = new Element(DocumentRoot);
-            root.setAttribute(AlternativeNameAttribute,getName());
-            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
+            root.setAttribute("AlternativeNameAttribute",getName());
+            root.setAttribute("AlternativeDescriptionAttribute",getDescription());
+            root.setAttribute("AlternativeFilenameAttribute",file.getAbsolutePath());
             if(_inputDataLocations!=null) {
                 saveDataLocations(root, _inputDataLocations);
             }
@@ -196,21 +154,53 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
         return false;
     }
+    @Override
+    protected boolean loadDocument(org.jdom.Document dcmnt) {
+        if(dcmnt!=null){
+            org.jdom.Element ele = dcmnt.getRootElement();
+            if(ele==null){
+                System.out.println("No root element on the provided XML document.");
+                return false;
+            }
+            if(ele.getName().equals(DocumentRoot)){
+                setName(ele.getAttributeValue("AlternativeNameAttribute"));
+                setDescription(ele.getAttributeValue("AlternativeDescriptionAttribute"));
+                String val = ele.getAttributeValue("AlternativeFilenameAttribute");
+                RmaFile file = new RmaFile(val);
+                setFile(file);
+            }else{
+                System.out.println("XML document root was imporoperly named.");
+                return false;
+            }
+            if(_inputDataLocations ==null){
+                _inputDataLocations = new ArrayList<>();
+            }
+            _inputDataLocations.clear();
+            loadDataLocations(ele, _inputDataLocations);
 
+            if(_outputDataLocations ==null){
+                _outputDataLocations = new ArrayList<>();
+            }
+            _outputDataLocations.clear();
+            loadOutputDataLocations(ele, _outputDataLocations);
+
+            setModified(false);
+            return true;
+        }else{
+            System.out.println("XML document was null.");
+            return false;
+        }
+    }
     public List<OutputVariable> getOutputVariables(){
         return _outputVariables;
     }
     public boolean hasOutputVariables(){
-        if (_outputVariables != null){
-            if(_outputVariables.size() == 0){
-                return false;
-            }else{
-                return true;
-            }
-        }else{
+        if (_outputVariables == null || _outputVariables.size() == 0){
             return false;
         }
-    }
+        return true;
+        }
+
     boolean computeOutputVariables(List<OutputVariable> list) { return true; }
 
     public List<DataLocation> getInputDataLocations(){
@@ -220,18 +210,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
             return _inputDataLocations;
     }
-
-    public List<DataLocation> defaultInputDataLocations() {
-        List<DataLocation> dlList = new ArrayList<>();
-        //create datalocations for each location of interest, so that it can be linked to output from other models.
-
-        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook","Ensemble");
-        dlList.add(KanatockEnsemble);
-
-
-        return dlList;
-    }
-
     public List<DataLocation> getOutputDataLocations(){
         //construct input data locations.
         if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
@@ -240,6 +218,14 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return _outputDataLocations;
     }
 
+//These guys are just here for testing. We wouldn't really want default input and output data locations
+    public List<DataLocation> defaultInputDataLocations() {
+        List<DataLocation> dlList = new ArrayList<>();
+        //create datalocations for each location of interest, so that it can be linked to output from other models.
+        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook","Ensemble");
+        dlList.add(KanatockEnsemble);
+        return dlList;
+    }
     public List<DataLocation> defaultOutputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
         //create datalocations for each location of interest, so that it can be linked to output from other models.
