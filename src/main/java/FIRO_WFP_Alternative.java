@@ -5,26 +5,18 @@
  */
 
 import com.rma.io.RmaFile;
-import hec.JdbcTimeSeriesDatabase;
-import hec.TimeSeriesDatabase;
-import hec.stats.*;
-import hec.ensemble.Ensemble;
+import hec.SqliteDatabase;
 import hec.ensemble.EnsembleTimeSeries;
-import hec.ensemble.TimeSeriesIdentifier;
+import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
 import hec.model.RunTimeWindow;
-
-import hec.stats.MeanComputable;
-import hec.stats.MedianComputable;
-
+import hec.stats.MultiStatComputable;
+import hec.stats.Statistics;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
-import hec2.wat.client.WatFrame;
 import org.jdom.Document;
 import org.jdom.Element;
-
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +41,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         this();
         setName(name);
     }
-
     public void setComputeOptions(ComputeOptions opts){
         _computeOptions = opts;
     }
@@ -79,46 +70,20 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
 
         try {
-            TimeSeriesDatabase database = new JdbcTimeSeriesDatabase(databaseName, JdbcTimeSeriesDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
-            //  loop on input data locations
-            // determine location and parameter to create timeseries identifier from an input data location
+            SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
             for(int k=0; k<_inputDataLocations.size(); k++){
-                TimeSeriesIdentifier timeSeriesIdentifier = new TimeSeriesIdentifier(_inputDataLocations.get(k).getName(), _inputDataLocations.get(k).getParameter());
+                hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(_inputDataLocations.get(k).getName(), _inputDataLocations.get(k).getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
-                // Use the timewindow  rtw to iterate over issuance dates
-                //we now need to use the timewindow of the event and map to issuance dates in the database
-                int timeStepsInWindow = rtw.getNumSteps();
-                String rtwStartTime = rtw.getStartTimeString();
-                List<ZonedDateTime> issueDates = ensembleTimeSeries.getIssueDates();
-                int startingIndex = issueDates.indexOf(ZonedDateTime.parse(rtwStartTime)); //This needs testing.
-
-                //create an ensemble for each issue date. For loop
-                for(int i = startingIndex; i <= timeStepsInWindow; i++){
-                    Ensemble ensemble = database.getEnsemble(timeSeriesIdentifier,issueDates.get(i));
-                    WatFrame fr = hec2.wat.WAT.getWatFrame();
-                    fr.addMessage("We got the ensemble data!");
-
-                    for (DataLocation outputDataLocation : _outputDataLocations) {
-                        //from output data locations determine computes we need to perform for each output data location at this location
-                        //check for location, compute type, store data
-                        boolean isCorrectInputLocation = _inputDataLocations.get(k).equals(outputDataLocation);
-
-                        if (outputDataLocation.getComputeType().toString().equals(EnsembleComputeTypes.Mean.toString()) && isCorrectInputLocation) {
-                            Computable stat = new MeanComputable();
-                            float[] output = ensemble.iterateForTimeAcrossTraces(stat);
-                            fr.addMessage("This is the mean across time for the first trace: " + output[0]);
-
-                        }
-                        if (outputDataLocation.getComputeType().toString().equals(EnsembleComputeTypes.Median.toString()) && isCorrectInputLocation) {
-                            Computable test2 = new MedianComputable();
-                            float[] output2 = ensemble.iterateForTimeAcrossTraces(test2);
-                            fr.addMessage("This is mean across traces for the first timestep: " + output2[0]);
-                        }
+                for (DataLocation outDataLocation:_outputDataLocations)
+                {
+                    MetricOutputDataLocation metricOutDataLocation = (MetricOutputDataLocation) outDataLocation;
+                    if (outDataLocation.getName().equals(_inputDataLocations.get(k).getName())){
+                        MultiStatComputable msc = new MultiStatComputable(metricOutDataLocation.getStats());
+                        MetricCollectionTimeSeries mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(msc);
+                        database.write(mcts);
                     }
                 }
-
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -229,8 +194,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public List<DataLocation> defaultOutputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
         //create datalocations for each location of interest, so that it can be linked to output from other models.
-
-        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook",EnsembleComputeTypes.Max.toString());
+        Statistics[] metricArray = new Statistics[1];
+        metricArray[0] =Statistics.MAX;
+        DataLocation KanatockEnsemble = new MetricOutputDataLocation(this.getModelAlt(),"Kanatook","Ensemble",metricArray);
         dlList.add(KanatockEnsemble);
 
         return dlList;
