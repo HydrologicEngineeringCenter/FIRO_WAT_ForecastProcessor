@@ -3,8 +3,6 @@ import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
-import java.util.List;
-
 public class MetricOutputDataLocation extends DataLocation {
     private Statistics[] _metricList;
     public MetricOutputDataLocation(ModelAlternative modelAlt, String name, String parameter, Statistics[] metricList){
