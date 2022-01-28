@@ -9,7 +9,6 @@ import hec.SqliteDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
-import hec.model.RunTimeWindow;
 import hec.stats.MultiStatComputable;
 import hec.stats.Statistics;
 import hec2.model.DataLocation;
@@ -17,6 +16,7 @@ import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
+
 import java.util.ArrayList;
 import java.util.List;
 
