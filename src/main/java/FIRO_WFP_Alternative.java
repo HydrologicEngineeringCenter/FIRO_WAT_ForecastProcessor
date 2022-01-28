@@ -25,6 +25,7 @@ import java.util.List;
  * @author WatPowerUser
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
+    //region Fields
     private String _pluginVersion;
     List<DataLocation> _inputDataLocations;
     List<DataLocation> _outputDataLocations ;
@@ -34,6 +35,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeDescriptionAttribute = "Desc";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
+    //endregion
+    //region Constructors
     public FIRO_WFP_Alternative(){
         super();
     }
@@ -41,43 +44,67 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         this();
         setName(name);
     }
+    //endregion
+    //region Getters and Setters
+    @Override
+    public int getModelCount() {
+        return 1;
+    }
+    public List<DataLocation> getInputDataLocations(){
+        //construct input data locations.
+        if(_inputDataLocations==null ||_inputDataLocations.isEmpty()){
+            _inputDataLocations = defaultInputDataLocations();
+        }
+        return _inputDataLocations;
+    }
+    public List<DataLocation> getOutputDataLocations(){
+        //construct input data locations.
+        if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
+            _outputDataLocations = defaultOutputDataLocations();
+        }
+        return _outputDataLocations;
+    }
+    public List<OutputVariable> getOutputVariables(){
+        return _outputVariables;
+    }
+    @Override
+    public String getLogFile() {
+        return null;
+    }
     public void setComputeOptions(ComputeOptions opts){
         _computeOptions = opts;
     }
+    public boolean hasOutputVariables(){
+        if (_outputVariables == null || _outputVariables.size() == 0){
+            return false;
+        }
+        return true;
+    }
+    //endregion
+    //region Ignored Boilerplate
     @Override
     public boolean isComputable() {
         return true;
     }
-
+    boolean computeOutputVariables(List<OutputVariable> list) { return true; }
+    @Override
+    public boolean cancelCompute() {
+        return false;
+    }
+    //endregion
     @Override
     public boolean compute() {
         String dssName;
         dssName = _computeOptions.getDssFilename();
         String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
-        hec2.wat.model.ComputeOptions wco;
-        if(_computeOptions instanceof hec2.wat.model.ComputeOptions) {
-            wco = (hec2.wat.model.ComputeOptions) _computeOptions;
-            RunTimeWindow rtw = wco.getEventList().get(wco.getCurrentEventNumber());
-            return computeForTimeWindow(rtw);
-        } else{
-            return false;
-        }
-    }
-
-    private boolean computeForTimeWindow(RunTimeWindow rtw){
-        String dssName;
-        dssName = _computeOptions.getDssFilename();
-        String databaseName = dssName.substring(0,dssName.length() - 3) + "db";
-
         try {
             SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
-            for(int k=0; k<_inputDataLocations.size(); k++){
-                hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(_inputDataLocations.get(k).getName(), _inputDataLocations.get(k).getParameter());
+            for (DataLocation inputDataLocation : _inputDataLocations) {
+                hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
-                for (DataLocation outDataLocation:_outputDataLocations)
-                {
+                for (DataLocation outDataLocation : _outputDataLocations) {
                     MetricOutputDataLocation metricOutDataLocation = (MetricOutputDataLocation) outDataLocation;
-                    if (outDataLocation.getName().equals(_inputDataLocations.get(k).getName())){
+                    if (outDataLocation.getName().equals(inputDataLocation.getName())) {
                         MultiStatComputable msc = new MultiStatComputable(metricOutDataLocation.getStats());
                         MetricCollectionTimeSeries mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(msc);
                         database.write(mcts);
@@ -88,18 +115,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             e.printStackTrace();
         }
         return true;
-    }
-    @Override
-    public boolean cancelCompute() {
-        return false;
-    }
-    @Override
-    public String getLogFile() {
-        return null;
-    }
-    @Override
-    public int getModelCount() {
-        return 1;
     }
     @Override
     public boolean saveData(RmaFile file){
@@ -156,33 +171,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             return false;
         }
     }
-    public List<OutputVariable> getOutputVariables(){
-        return _outputVariables;
-    }
-    public boolean hasOutputVariables(){
-        if (_outputVariables == null || _outputVariables.size() == 0){
-            return false;
-        }
-        return true;
-        }
-
-    boolean computeOutputVariables(List<OutputVariable> list) { return true; }
-
-    public List<DataLocation> getInputDataLocations(){
-        //construct input data locations.
-        if(_inputDataLocations==null ||_inputDataLocations.isEmpty()){
-            _inputDataLocations = defaultInputDataLocations();
-        }
-            return _inputDataLocations;
-    }
-    public List<DataLocation> getOutputDataLocations(){
-        //construct input data locations.
-        if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
-            _outputDataLocations = defaultOutputDataLocations();
-        }
-        return _outputDataLocations;
-    }
-
 //These guys are just here for testing. We wouldn't really want default input and output data locations
     public List<DataLocation> defaultInputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
