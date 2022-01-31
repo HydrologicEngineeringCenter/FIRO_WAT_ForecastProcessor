@@ -9,6 +9,9 @@ public class MetricOutputDataLocation extends DataLocation {
         super(modelAlt,name,parameter);
         _metricList = metricList;
     }
+    public MetricOutputDataLocation(){
+        super();
+    }
     @Override
     public org.jdom.Element toXML(Element parent){
         Element baseEl = super.toXML(parent);
@@ -17,11 +20,11 @@ public class MetricOutputDataLocation extends DataLocation {
     }
     @Override
     public boolean fromXML(Element myElement){
+        super.fromXML(myElement);
         String stringMetrics = myElement.getAttributeValue("Metrics");
-        if(stringMetrics != null){
+        if(stringMetrics != null || !stringMetrics.isEmpty() ){
             MetricStringsToStatistics(stringMetrics);
         }
-        super.fromXML(myElement);
         return true;
     }
     private String metricStatisticsToString(){
@@ -34,7 +37,7 @@ public class MetricOutputDataLocation extends DataLocation {
     }
     private void MetricStringsToStatistics(String stringStats){
         String[] splitString = stringStats.split(",");
-        Statistics[] _metricList = new Statistics[splitString.length];
+        _metricList = new Statistics[splitString.length];
         for (int i = 0; i< splitString.length; i++){
             _metricList[i] = Statistics.valueOf(splitString[i]);
         }

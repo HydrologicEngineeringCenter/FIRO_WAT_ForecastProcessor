@@ -28,7 +28,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //region Fields
     private String _pluginVersion;
     List<DataLocation> _inputDataLocations;
-    List<DataLocation> _outputDataLocations ;
+    List<MetricOutputDataLocation> _outputDataLocations ;
     private static final String DocumentRoot = "FIRO_WFP_Alternative";
     private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
@@ -62,7 +62,11 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
             _outputDataLocations = defaultOutputDataLocations();
         }
-        return _outputDataLocations;
+        List<DataLocation> outputAsDataLoc = new ArrayList<DataLocation>();
+        for(DataLocation dl : _outputDataLocations){
+            outputAsDataLoc.add(dl);
+        }
+        return outputAsDataLoc;
     }
     public List<OutputVariable> getOutputVariables(){
         return _outputVariables;
@@ -102,10 +106,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
-                for (DataLocation outDataLocation : _outputDataLocations) {
-                    MetricOutputDataLocation metricOutDataLocation = (MetricOutputDataLocation) outDataLocation;
+                for (MetricOutputDataLocation outDataLocation : _outputDataLocations) {
                     if (outDataLocation.getName().equals(inputDataLocation.getName())) {
-                        MultiStatComputable msc = new MultiStatComputable(metricOutDataLocation.getStats());
+                        MultiStatComputable msc = new MultiStatComputable(outDataLocation.getStats());
                         MetricCollectionTimeSeries mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(msc);
                         database.write(mcts);
                     }
@@ -127,13 +130,35 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 saveDataLocations(root, _inputDataLocations);
             }
             if(_outputDataLocations!=null) {
-                saveOutputDataLocations(root, _outputDataLocations);
+                saveMetricOutputDataLocations(root, _outputDataLocations);
             }
             Document doc = new Document(root);
             return writeXMLFile(doc,file);
         }
         return false;
     }
+
+     void loadMetricOutputDataLocations(Element root, List<MetricOutputDataLocation> outputDataLocations) {
+         for (Object child : root.getChildren()) {
+             Element ele = (Element)child;
+             if(ele.getName().equals("OutputDataLocations")){
+                 for ( Object Grandchild: ele.getChildren() ){
+                     MetricOutputDataLocation outDataLocation = new MetricOutputDataLocation();
+                     Element outputEle = (Element)Grandchild;
+                     outDataLocation.fromXML(outputEle);
+                     outputDataLocations.add(outDataLocation);
+                 }
+             }
+         }
+    }
+
+    void saveMetricOutputDataLocations(Element root, List<MetricOutputDataLocation> outputDataLocations) {
+        root.addContent(new Element("OutputDataLocations"));
+        for( MetricOutputDataLocation outputDataLocation : outputDataLocations){
+            outputDataLocation.toXML(root.getChild("OutputDataLocations"));
+        }
+    }
+
     @Override
     protected boolean loadDocument(org.jdom.Document dcmnt) {
         if(dcmnt!=null){
@@ -162,7 +187,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 _outputDataLocations = new ArrayList<>();
             }
             _outputDataLocations.clear();
-            loadOutputDataLocations(ele, _outputDataLocations);
+            loadMetricOutputDataLocations(ele, _outputDataLocations);
 
             setModified(false);
             return true;
@@ -171,21 +196,22 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             return false;
         }
     }
+
 //These guys are just here for testing. We wouldn't really want default input and output data locations
     public List<DataLocation> defaultInputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
         //create datalocations for each location of interest, so that it can be linked to output from other models.
-        DataLocation KanatockEnsemble = new DataLocation(this.getModelAlt(),"Kanatook","Ensemble");
-        dlList.add(KanatockEnsemble);
+        DataLocation CoyoteEnsemble = new DataLocation(this.getModelAlt(),"Coyote.fake_forecast","flow");
+        dlList.add(CoyoteEnsemble);
         return dlList;
     }
-    public List<DataLocation> defaultOutputDataLocations() {
-        List<DataLocation> dlList = new ArrayList<>();
+    public List<MetricOutputDataLocation> defaultOutputDataLocations() {
+        List<MetricOutputDataLocation> dlList = new ArrayList<>();
         //create datalocations for each location of interest, so that it can be linked to output from other models.
         Statistics[] metricArray = new Statistics[1];
         metricArray[0] =Statistics.MAX;
-        DataLocation KanatockEnsemble = new MetricOutputDataLocation(this.getModelAlt(),"Kanatook","Ensemble",metricArray);
-        dlList.add(KanatockEnsemble);
+        MetricOutputDataLocation CoyoteEnsemble = new MetricOutputDataLocation(this.getModelAlt(),"Coyote.fake_forecast","flow",metricArray);
+        dlList.add(CoyoteEnsemble);
 
         return dlList;
     }
