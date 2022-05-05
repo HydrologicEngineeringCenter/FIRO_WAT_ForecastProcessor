@@ -7,9 +7,6 @@ repositories {
     flatDir{
         dirs ("lib")
     }
-    flatDir{
-        dirs ("FIRO_TSEnsembles/FIRO_TSEnsembles/build/libs/")
-    }
     maven {
         url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
     }
