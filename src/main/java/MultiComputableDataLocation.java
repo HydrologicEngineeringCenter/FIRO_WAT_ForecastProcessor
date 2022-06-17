@@ -9,6 +9,14 @@ import java.util.List;
 
 public class MultiComputableDataLocation extends DataLocation {
     private MultiComputable computableThing;
+    private boolean acrossTime = true;
+
+    public MultiComputable getComputableThing() {
+        return computableThing;
+    }
+    public boolean isAcrossTime() {
+        return acrossTime;
+    }
 
     public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing) {
         super(modelAlt, name, parameter);

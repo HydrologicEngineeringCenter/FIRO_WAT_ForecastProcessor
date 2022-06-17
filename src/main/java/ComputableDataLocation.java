@@ -8,6 +8,14 @@ import java.util.List;
 
 public class ComputableDataLocation extends DataLocation {
     private Computable computableThing;
+    private boolean acrossTime = true;
+
+    public Computable getComputableThing() {
+        return computableThing;
+    }
+    public boolean isAcrossTime() {
+        return acrossTime;
+    }
 
     public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing) {
         super(modelAlt, name, parameter);

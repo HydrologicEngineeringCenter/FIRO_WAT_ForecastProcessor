@@ -9,6 +9,9 @@ import java.util.List;
 
 public class SingleComputableDataLocation extends DataLocation {
     private SingleComputable computableThing;
+    public SingleComputable getComputableThing() {
+        return computableThing;
+    }
 
     public SingleComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, SingleComputable computableThing) {
         super(modelAlt, name, parameter);
@@ -44,4 +47,6 @@ public class SingleComputableDataLocation extends DataLocation {
         }
         return true;
     }
+
+
 }
