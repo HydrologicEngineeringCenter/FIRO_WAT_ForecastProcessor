@@ -3,13 +3,12 @@ import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class MultiComputableDataLocationTest {
+    Statistics[] stats = new Statistics[]{Statistics.MAX, Statistics.AVERAGE, Statistics.MIN};
+    MultiComputable multiStatComputable = new MultiStatComputable(stats);
 
-class ComputableDataLocationTest {
-    Computable maxAccumDuration = new MaxAccumDuration(3);
-    ComputableDataLocation cdl = new ComputableDataLocation(new ModelAlternative(),"Popeye","Flow",maxAccumDuration);
+    MultiComputableDataLocation cdl = new MultiComputableDataLocation(new ModelAlternative(),"Popeye","Flow",multiStatComputable);
     Element parent = new Element("OutputDataLocations");
-
     @Test
     void toXML() {
         cdl.toXML(parent);

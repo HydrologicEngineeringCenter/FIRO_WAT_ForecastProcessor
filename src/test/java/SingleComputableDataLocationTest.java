@@ -3,13 +3,11 @@ import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+class SingleComputableDataLocationTest {
+    SingleComputable twostep = new TwoStepComputable(new MaxComputable(),new MeanComputable(), true);
 
-class ComputableDataLocationTest {
-    Computable maxAccumDuration = new MaxAccumDuration(3);
-    ComputableDataLocation cdl = new ComputableDataLocation(new ModelAlternative(),"Popeye","Flow",maxAccumDuration);
+    SingleComputableDataLocation cdl = new SingleComputableDataLocation(new ModelAlternative(),"Popeye","Flow",twostep);
     Element parent = new Element("OutputDataLocations");
-
     @Test
     void toXML() {
         cdl.toXML(parent);
