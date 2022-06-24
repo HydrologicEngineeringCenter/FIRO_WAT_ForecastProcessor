@@ -15,6 +15,8 @@ import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
+
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +34,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
+    private static final String AlternativeFilenameAttribute = "?";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
@@ -164,9 +167,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public boolean saveData(RmaFile file){
         if(file!=null){
             Element root = new Element(DocumentRoot);
-            root.setAttribute("AlternativeNameAttribute",getName());
-            root.setAttribute("AlternativeDescriptionAttribute",getDescription());
-            root.setAttribute("AlternativeFilenameAttribute",file.getAbsolutePath());
+            root.setAttribute(AlternativeNameAttribute,getName());
+            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
+            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
             if(_inputDataLocations!=null) {
                 saveDataLocations(root, _inputDataLocations);}
             if(_outputDataLocations!=null) {
@@ -220,9 +223,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 return false;
             }
             if(ele.getName().equals(DocumentRoot)){
-                setName(ele.getAttributeValue("AlternativeNameAttribute"));
-                setDescription(ele.getAttributeValue("AlternativeDescriptionAttribute"));
-                String val = ele.getAttributeValue("AlternativeFilenameAttribute");
+                setName(ele.getAttributeValue(AlternativeNameAttribute));
+                setDescription(ele.getAttributeValue(AlternativeDescriptionAttribute));
+                String val = ele.getAttributeValue(AlternativeFilenameAttribute);
                 RmaFile file = new RmaFile(val);
                 setFile(file);
             }else{
@@ -259,19 +262,33 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     public List<DataLocation> defaultOutputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
-        //create datalocations for each location of interest, so that it can be linked to output from other models.
-        Computable mc = new MaxComputable();
-        MultiComputable msc = new MultiStatComputable(new Statistics[]{Statistics.MIN,Statistics.MAX,Statistics.AVERAGE});
-        SingleComputable sc = new TwoStepComputable(new MaxComputable(), new MeanComputable(), true);
-        DataLocation ComputableEnsemble = new ComputableDataLocation(this.getModelAlt(),"Compute","flow",mc);
-        DataLocation MultiComputableEnsemble = new MultiComputableDataLocation(this.getModelAlt(),"MultiCompute","flow",msc);
-        DataLocation SingleComputableEnsemble = new SingleComputableDataLocation(this.getModelAlt(),"SingleCompute","flow",sc);
-        dlList.add(ComputableEnsemble);
-        dlList.add(MultiComputableEnsemble);
-        dlList.add(SingleComputableEnsemble);
-
+        dlList.add(PradoMean());
+        dlList.add(PradoVolume24());
+        dlList.add(PradoVolume48());
+        dlList.add(PradoVolume72());
+        dlList.add(PradoPercentiles());
         return dlList;
     }
-
+    private DataLocation PradoPercentiles(){
+        float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
+        MultiComputable percentileCompute = new PercentilesComputable(percentilesToCompute);
+        return new MultiComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",percentileCompute,false);
+    }
+    private DataLocation PradoMean(){
+        Computable meanCompute = new MeanComputable();
+        return new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",meanCompute,false);
+    }
+    private DataLocation PradoVolume24(){
+        Computable AccumDurCompute = new MaxAccumDuration(24);
+        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
+    }
+    private DataLocation PradoVolume48(){
+        Computable AccumDurCompute = new MaxAccumDuration(48);
+        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
+    }
+    private DataLocation PradoVolume72(){
+        Computable AccumDurCompute = new MaxAccumDuration(72);
+        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
+    }
 
 }
