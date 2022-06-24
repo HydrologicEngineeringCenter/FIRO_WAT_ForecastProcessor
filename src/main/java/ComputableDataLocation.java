@@ -17,9 +17,10 @@ public class ComputableDataLocation extends DataLocation {
         return acrossTime;
     }
 
-    public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing) {
+    public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing, boolean computeAcrossTime) {
         super(modelAlt, name, parameter);
         this.computableThing = computableThing;
+        this.acrossTime = computeAcrossTime;
     }
 
     public ComputableDataLocation() {

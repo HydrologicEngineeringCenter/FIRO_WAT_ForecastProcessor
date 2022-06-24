@@ -18,9 +18,10 @@ public class MultiComputableDataLocation extends DataLocation {
         return acrossTime;
     }
 
-    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing) {
+    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing, boolean computeAcrossTime) {
         super(modelAlt, name, parameter);
         this.computableThing = computableThing;
+        this.acrossTime = computeAcrossTime;
     }
     public MultiComputableDataLocation() {
         super();
