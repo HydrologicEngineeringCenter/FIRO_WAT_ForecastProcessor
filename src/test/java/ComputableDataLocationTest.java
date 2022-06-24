@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ComputableDataLocationTest {
     Computable maxAccumDuration = new MaxAccumDuration(3);
-    ComputableDataLocation cdl = new ComputableDataLocation(new ModelAlternative(),"Popeye","Flow",maxAccumDuration);
+    ComputableDataLocation cdl = new ComputableDataLocation(new ModelAlternative(),"Popeye","Flow",maxAccumDuration,false);
     Element parent = new Element("OutputDataLocations");
 
     @Test

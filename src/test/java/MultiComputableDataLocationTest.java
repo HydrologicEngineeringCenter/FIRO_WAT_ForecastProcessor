@@ -7,7 +7,7 @@ class MultiComputableDataLocationTest {
     Statistics[] stats = new Statistics[]{Statistics.MAX, Statistics.AVERAGE, Statistics.MIN};
     MultiComputable multiStatComputable = new MultiStatComputable(stats);
 
-    MultiComputableDataLocation cdl = new MultiComputableDataLocation(new ModelAlternative(),"Popeye","Flow",multiStatComputable);
+    MultiComputableDataLocation cdl = new MultiComputableDataLocation(new ModelAlternative(),"Popeye","Flow",multiStatComputable,false);
     Element parent = new Element("OutputDataLocations");
     @Test
     void toXML() {
