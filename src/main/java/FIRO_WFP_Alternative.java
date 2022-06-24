@@ -15,8 +15,6 @@ import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
-
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
-    private static final String AlternativeFilenameAttribute = "?";
+    private static final String AlternativeFilenameAttribute = "WellIDontKnow";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
@@ -256,19 +254,56 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public List<DataLocation> defaultInputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
         //create datalocations for each location of interest, so that it can be linked to output from other models.
-        DataLocation CoyoteEnsemble = new DataLocation(this.getModelAlt(),"Coyote.fake_forecast","flow");
-        dlList.add(CoyoteEnsemble);
+        DataLocation Inflow = new DataLocation(this.getModelAlt(),"ADOC","FLOW");
+        dlList.add(Inflow);
         return dlList;
     }
     public List<DataLocation> defaultOutputDataLocations() {
         List<DataLocation> dlList = new ArrayList<>();
-        dlList.add(PradoMean());
-        dlList.add(PradoVolume24());
-        dlList.add(PradoVolume48());
-        dlList.add(PradoVolume72());
-        dlList.add(PradoPercentiles());
+        float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
+        MultiComputable cumulativeComputable = new CumulativeComputable();
+        int[] daysToCompute = new int[]{1,2,3};
+        for( int days : daysToCompute){
+            Computable cumulative = new NDayMultiComputable(cumulativeComputable,days);
+            for( float percentile : percentilesToCompute){
+                Computable percentileCompute = new PercentilesComputable(percentile);
+                SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
+                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days" + percentile + "%", "VOLUME",twoStep);
+                dlList.add(dl);
+            }
+            Computable meanCompute = new MeanComputable();
+            SingleComputable twoStep = new TwoStepComputable(cumulative,meanCompute,false);
+            SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days" + " Mean", "VOLUME",twoStep);
+            dlList.add(dl);
+            return dlList;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
         return dlList;
     }
+
+
+
+
+
+
+
+
+
+
+
+
     private DataLocation PradoPercentiles(){
         float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
         MultiComputable percentileCompute = new PercentilesComputable(percentilesToCompute);
