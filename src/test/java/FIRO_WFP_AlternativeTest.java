@@ -1,4 +1,5 @@
 import com.rma.io.RmaFile;
+import hec2.plugin.model.ComputeOptions;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -20,6 +21,8 @@ class FIRO_WFP_AlternativeTest {
         _alt = new FIRO_WFP_Alternative("myName");
         _alt.setDescription("myDescription");
         _alt.setFile(rf);
+        ComputeOptions opts = new ComputeOptions();
+        opts.setDssFilename("src/test/resources/testing.dss");
     }
 
     @Test
@@ -39,6 +42,13 @@ class FIRO_WFP_AlternativeTest {
         assertTrue(tmpAlt.loadDocument(doc));
     }
 
+    @Test
+    void compute() throws JDOMException, IOException {
+        SAXBuilder sax = new SAXBuilder();
+        Document doc = sax.build(new File("src/test/resources/savedata.xml"));
+        _alt.loadDocument(doc);
+        _alt.compute();
+    }
 
     @AfterEach
     void tearDown() {
