@@ -7,6 +7,7 @@
 import com.rma.io.RmaFile;
 import hec.SqliteDatabase;
 import hec.ensemble.EnsembleTimeSeries;
+import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
 import hec.stats.*;
@@ -157,7 +158,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String dssName;
         dssName = _computeOptions.getDssFilename();
 
-        return dssName.substring(0,dssName.length() - 3) + "sql";
+        return dssName.substring(0,dssName.length() - 3) + "db";
     }
 
     @Override

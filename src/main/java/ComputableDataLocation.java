@@ -1,5 +1,5 @@
-import hec.stats.Computable;
-import hec.stats.Serializer;
+import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.Serializer;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;

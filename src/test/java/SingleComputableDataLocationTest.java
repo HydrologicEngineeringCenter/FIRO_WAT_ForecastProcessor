@@ -1,4 +1,4 @@
-import hec.stats.*;
+import hec.ensemble.stats.*;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,6 @@
 import com.rma.io.RmaFile;
+import hec.ensemble.stats.SingleComputable;
+import hec.ensemble.stats.TwoStepComputable;
 import hec2.plugin.model.ComputeOptions;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -22,7 +24,7 @@ class FIRO_WFP_AlternativeTest {
         _alt.setDescription("myDescription");
         _alt.setFile(rf);
         ComputeOptions opts = new ComputeOptions();
-        opts.setDssFilename("src/test/resources/testing.dss");
+        opts.setDssFilename("src/test/resources/ensembles.dss");
         _alt.setComputeOptions(opts);
     }
 
@@ -38,6 +40,9 @@ class FIRO_WFP_AlternativeTest {
         int actualOutputs = _alt._outputDataLocations.size();
         assertEquals(expectedInputs,actualInputs);
         assertEquals(expectedOutputs,actualOutputs);
+
+        SingleComputable computable = ((SingleComputableDataLocation)(_alt._outputDataLocations.get(0))).getComputableThing();
+        TwoStepComputable twoStepComputable = ((TwoStepComputable)computable);
     }
 
     @Test
