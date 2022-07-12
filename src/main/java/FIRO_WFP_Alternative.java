@@ -32,7 +32,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
-    private static final String AlternativeFilenameAttribute = "WellIDontKnow";
+    private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
@@ -158,6 +158,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private String getOutputDatabaseName() {
         String dssName;
         dssName = _computeOptions.getDssFilename();
+
         return dssName.substring(0,dssName.length() - 3) + "db";
     }
 
@@ -240,7 +241,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 _outputDataLocations = new ArrayList<>();
             }
             _outputDataLocations.clear();
-            loadDataLocations(ele, _outputDataLocations);
+            loadOutputDataLocations(ele, _outputDataLocations);
 
             setModified(false);
             return true;
@@ -277,30 +278,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             dlList.add(dl);
             return dlList;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
         return dlList;
     }
-
-
-
-
-
-
-
-
-
 
 
 
