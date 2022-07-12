@@ -23,6 +23,7 @@ class FIRO_WFP_AlternativeTest {
         _alt.setFile(rf);
         ComputeOptions opts = new ComputeOptions();
         opts.setDssFilename("src/test/resources/testing.dss");
+        _alt.setComputeOptions(opts);
     }
 
     @Test
@@ -31,6 +32,12 @@ class FIRO_WFP_AlternativeTest {
         _alt.getOutputDataLocations();
         RmaFile rf = new RmaFile("src/test/resources/savedata.xml");
         assertTrue(_alt.saveData(rf));
+        int expectedInputs = 1;
+        int expectedOutputs = 8;
+        int actualInputs = _alt._inputDataLocations.size();
+        int actualOutputs = _alt._outputDataLocations.size();
+        assertEquals(expectedInputs,actualInputs);
+        assertEquals(expectedOutputs,actualOutputs);
     }
 
     @Test
@@ -40,6 +47,12 @@ class FIRO_WFP_AlternativeTest {
         // XML is a local file
         Document doc = sax.build(new File("src/test/resources/savedata.xml"));
         assertTrue(tmpAlt.loadDocument(doc));
+        int expectedInputs = 1;
+        int expectedOutputs = 8;
+        int actualInputs = tmpAlt._inputDataLocations.size();
+        int actualOutputs = tmpAlt._outputDataLocations.size();
+        assertEquals(expectedInputs,actualInputs);
+        assertEquals(expectedOutputs,actualOutputs);
     }
 
     @Test
