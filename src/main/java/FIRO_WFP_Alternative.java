@@ -101,16 +101,14 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public boolean compute() {
         String databaseName = getOutputDatabaseName();
         try {
-            SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_NO_UPDATE);
+            SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
                 for (DataLocation outDataLocation : _outputDataLocations) {
-                    if (outDataLocation.getName().equals(inputDataLocation.getName())) {
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
-                    }
                 }
             }
         } catch (Exception e) {
@@ -159,7 +157,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String dssName;
         dssName = _computeOptions.getDssFilename();
 
-        return dssName.substring(0,dssName.length() - 3) + "db";
+        return dssName.substring(0,dssName.length() - 3) + "sql";
     }
 
     @Override
@@ -269,7 +267,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             for( float percentile : percentilesToCompute){
                 Computable percentileCompute = new PercentilesComputable(percentile);
                 SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
-                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days" + percentile + "%", "VOLUME",twoStep);
+                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days " + percentile + "%", "VOLUME",twoStep);
                 dlList.add(dl);
             }
             Computable meanCompute = new MeanComputable();
@@ -280,29 +278,4 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
         return dlList;
     }
-
-
-
-    private DataLocation PradoPercentiles(){
-        float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
-        MultiComputable percentileCompute = new PercentilesComputable(percentilesToCompute);
-        return new MultiComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",percentileCompute,false);
-    }
-    private DataLocation PradoMean(){
-        Computable meanCompute = new MeanComputable();
-        return new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",meanCompute,false);
-    }
-    private DataLocation PradoVolume24(){
-        Computable AccumDurCompute = new MaxAccumDuration(24);
-        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
-    }
-    private DataLocation PradoVolume48(){
-        Computable AccumDurCompute = new MaxAccumDuration(48);
-        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
-    }
-    private DataLocation PradoVolume72(){
-        Computable AccumDurCompute = new MaxAccumDuration(72);
-        return  new ComputableDataLocation(this.getModelAlt(),"ADOC","FLOW",AccumDurCompute,false);
-    }
-
 }
