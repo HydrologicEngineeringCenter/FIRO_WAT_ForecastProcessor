@@ -37,7 +37,7 @@ public class SingleComputableDataLocation extends DataLocation {
                 c = Class.forName(elementName);
                 Class<?>[] interfaces = c.getInterfaces();
                 for (Class<?> inters : interfaces) {
-                    if (inters.getName().equals("hec.stats.SingleComputable")) {
+                    if (inters.getName().equals("hec.ensemble.stats.SingleComputable")) {
                         computableThing = Serializer.fromXML(childElement);
                     }
                 }
@@ -47,6 +47,5 @@ public class SingleComputableDataLocation extends DataLocation {
         }
         return true;
     }
-
 
 }

@@ -46,7 +46,7 @@ public class ComputableDataLocation extends DataLocation {
                 c = Class.forName(elementName);
                 Class<?>[] interfaces = c.getInterfaces();
                 for (Class<?> inters : interfaces) {
-                    if (inters.getName().equals("hec.stats.Computable")) {
+                    if (inters.getName().equals("hec.ensemble.stats.Computable")) {
                         computableThing = Serializer.fromXML(childElement);
                     }
                 }

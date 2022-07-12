@@ -44,7 +44,7 @@ public class MultiComputableDataLocation extends DataLocation {
                 c = Class.forName(elementName);
                 Class<?>[] interfaces = c.getInterfaces();
                 for (Class<?> inters : interfaces) {
-                    if (inters.getName().equals("hec.stats.MultiComputable")) {
+                    if (inters.getName().equals("hec.ensemble.stats.MultiComputable")) {
                         computableThing = Serializer.fromXML(childElement);
                     }
                 }
