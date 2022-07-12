@@ -10,7 +10,7 @@ import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
-import hec.stats.*;
+import hec.ensemble.stats.*;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
