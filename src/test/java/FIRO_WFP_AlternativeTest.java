@@ -1,7 +1,7 @@
 import com.rma.io.RmaFile;
 import hec.ensemble.stats.SingleComputable;
 import hec.ensemble.stats.TwoStepComputable;
-import hec2.plugin.model.ComputeOptions;
+import hec2.wat.model.ComputeOptions;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -23,7 +23,7 @@ class FIRO_WFP_AlternativeTest {
         _alt = new FIRO_WFP_Alternative("myName");
         _alt.setDescription("myDescription");
         _alt.setFile(rf);
-        ComputeOptions opts = new ComputeOptions();
+        hec2.wat.model.ComputeOptions opts = new ComputeOptions();
         opts.setDssFilename("src/test/resources/ensembles.dss");
         _alt.setComputeOptions(opts);
     }
@@ -34,15 +34,6 @@ class FIRO_WFP_AlternativeTest {
         _alt.getOutputDataLocations();
         RmaFile rf = new RmaFile("src/test/resources/savedata.xml");
         assertTrue(_alt.saveData(rf));
-        int expectedInputs = 1;
-        int expectedOutputs = 8;
-        int actualInputs = _alt._inputDataLocations.size();
-        int actualOutputs = _alt._outputDataLocations.size();
-        assertEquals(expectedInputs,actualInputs);
-        assertEquals(expectedOutputs,actualOutputs);
-
-        SingleComputable computable = ((SingleComputableDataLocation)(_alt._outputDataLocations.get(0))).getComputableThing();
-        TwoStepComputable twoStepComputable = ((TwoStepComputable)computable);
     }
 
     @Test
@@ -65,7 +56,7 @@ class FIRO_WFP_AlternativeTest {
         SAXBuilder sax = new SAXBuilder();
         Document doc = sax.build(new File("src/test/resources/savedata.xml"));
         _alt.loadDocument(doc);
-        _alt.compute();
+        assertTrue(_alt.compute());
     }
 
     @AfterEach
