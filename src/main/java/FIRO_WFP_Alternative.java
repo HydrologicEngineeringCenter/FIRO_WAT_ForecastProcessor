@@ -16,6 +16,8 @@ import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
+    private static final String DatabaseName = "ensembles.db";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
@@ -100,7 +103,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //endregion
     @Override
     public boolean compute() {
-        String databaseName = getOutputDatabaseName();
+        String databaseName = getInputOutputDatabaseName();
         try {
             SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
             for (DataLocation inputDataLocation : _inputDataLocations) {
@@ -154,11 +157,15 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return mcts;
     }
 
-    private String getOutputDatabaseName() {
-        String dssName;
-        dssName = _computeOptions.getDssFilename();
-
-        return dssName.substring(0,dssName.length() - 3) + "db";
+    private String getInputOutputDatabaseName() {
+        //First Condition to make sure I can unit test this.
+        if(_computeOptions.getRunDirectory() == null){
+            return "src/test/resources/ensembles.db";
+        }
+        String runsDir;
+        runsDir = _computeOptions.getRunDirectory();
+        String databaseFullPath = runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
+        return databaseFullPath;
     }
 
     @Override
