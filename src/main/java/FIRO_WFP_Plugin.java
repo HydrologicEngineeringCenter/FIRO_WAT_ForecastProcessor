@@ -96,7 +96,8 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
     public boolean compute(ModelAlternative ma) {
         FIRO_WFP_Alternative alt = getAlt(ma);
         if (alt != null) {
-            alt.setComputeOptions(ma.getComputeOptions());
+            hec2.wat.model.ComputeOptions watComputeOptions = (hec2.wat.model.ComputeOptions)ma.getComputeOptions();
+            alt.setComputeOptions(watComputeOptions);
             return alt.compute();
         }
         return false;
