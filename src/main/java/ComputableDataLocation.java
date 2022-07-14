@@ -40,21 +40,13 @@ public class ComputableDataLocation extends DataLocation {
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            String elementName = childElement.getName();
-            Class<?> c;
-            try {
-                c = Class.forName(elementName);
-                Class<?>[] interfaces = c.getInterfaces();
-                for (Class<?> inters : interfaces) {
-                    if (inters.getName().equals("hec.ensemble.stats.Computable")) {
-                        computableThing = Serializer.fromXML(childElement);
-                    }
-                }
-            } catch (Exception ex) {
-                System.out.println("this child wasn't a computable");
+            if(childElement.getName().equals("ModelAlternative")){
+                continue;
             }
+            computableThing = Serializer.fromXML(childElement);
+            return true;
         }
-        return true;
+        return false;
     }
 }
 

@@ -31,21 +31,19 @@ public class SingleComputableDataLocation extends DataLocation {
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            String elementName = childElement.getName();
-            Class<?> c;
-            try {
-                c = Class.forName(elementName);
-                Class<?>[] interfaces = c.getInterfaces();
-                for (Class<?> inters : interfaces) {
-                    if (inters.getName().equals("hec.ensemble.stats.SingleComputable")) {
-                        computableThing = Serializer.fromXML(childElement);
-                    }
-                }
-            } catch (Exception ex) {
-                System.out.println("this child wasn't a SingleComputable");
+            if(childElement.getName().equals("ModelAlternative")){
+                continue;
             }
+            try{
+                computableThing = Serializer.fromXML(childElement);
+                return true;
+            }
+            catch (Exception ex){
+                System.out.println(ex);
+            }
+
         }
-        return true;
+        return false;
     }
 
 }
