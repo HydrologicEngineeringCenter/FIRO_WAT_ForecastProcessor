@@ -15,7 +15,7 @@ class SingleComputableDataLocationTest {
     @Test
     void fromXML() {
        Element cdlElement = cdl.toXML(parent);
-       ComputableDataLocation newCdl = new ComputableDataLocation();
+       SingleComputableDataLocation newCdl = new SingleComputableDataLocation();
        newCdl.fromXML(cdlElement);
        System.out.println("done");
 }}
