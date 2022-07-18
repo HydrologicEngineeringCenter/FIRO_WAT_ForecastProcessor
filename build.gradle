@@ -11,8 +11,8 @@ repositories {
         url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
     }
 }
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '8'
+targetCompatibility = '8'
 
 dependencies {
     runtimeOnly 'org.xerial:sqlite-jdbc:3.30.1'
