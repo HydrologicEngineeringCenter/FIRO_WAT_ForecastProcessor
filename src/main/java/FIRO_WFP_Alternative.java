@@ -30,6 +30,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private String _pluginVersion;
     List<DataLocation> _inputDataLocations;
     List<DataLocation> _outputDataLocations ;
+    String _timeStep;
     private static final String DocumentRoot = "FIRO_WFP_Alternative";
     private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
@@ -286,4 +287,25 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
         return dlList;
     }
+
+    public void setInputDataLocations(List<DataLocation> locs) {
+        _inputDataLocations.clear();
+        _inputDataLocations.addAll(locs);
+    }
+
+    public void setOutputDataLocations(List<DataLocation> locs) {
+        _outputDataLocations.clear();
+        _outputDataLocations.addAll(locs);
+    }
+
+    public void setTimeStep(String timeStep)
+    {
+            _timeStep = timeStep;
+    }
+
+    public String getTimeStep()
+    {
+        return _timeStep;
+    }
+
 }

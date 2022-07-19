@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+import com.rma.client.Browser;
 import com.rma.factories.NewObjectFactory;
 import hec.model.OutputVariable;
 import hec2.map.GraphicElement;
@@ -11,6 +12,7 @@ import hec2.model.DataLocation;
 import hec2.model.ProgramOrderItem;
 import hec2.plugin.action.EditAction;
 import hec2.plugin.action.OutputElement;
+import hec2.plugin.action.PluginAction;
 import hec2.plugin.lang.ModelLinkingException;
 import hec2.plugin.lang.OutputException;
 import hec2.plugin.model.ModelAlternative;
@@ -103,12 +105,20 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
         return false;
     }
     @Override
-    public void editAlternative(FIRO_WFP_Alternative e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void editAlternative(FIRO_WFP_Alternative firo_wfp_alternative) {
+        if (firo_wfp_alternative == null )
+        {
+            return;
+        }
+        WfpAltEditor editor = new WfpAltEditor(
+                Browser.getBrowserFrame(), true);
+        editor.setSelectionList(_altList);
+        editor.fillForm(firo_wfp_alternative);
+        editor.setVisible(true);
     }
     @Override
     public boolean displayApplication() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
     }
     @Override
     public List<GraphicElement> getGraphicElements(ModelAlternative ma) {
@@ -127,9 +137,7 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
         throw new UnsupportedOperationException("Not supported yet.");
     }
     @Override
-    public List<EditAction> getEditActions(ModelAlternative ma) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public List<EditAction> getEditActions(ModelAlternative ma) { throw new UnsupportedOperationException("Not using this.");}
     @Override
     public void editAction(String string, ModelAlternative ma) {
         throw new UnsupportedOperationException("Not supported yet.");
