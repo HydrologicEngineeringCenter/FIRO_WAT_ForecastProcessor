@@ -14,21 +14,24 @@ repositories {
 sourceCompatibility = '8'
 targetCompatibility = '8'
 
+def wat_version = "v1.1-1.1.0.682-SNAPSHOT"
+
 dependencies {
-    runtimeOnly 'org.xerial:sqlite-jdbc:3.30.1'
+    implementation "mil.army.usace.hec.wat:wat-hec:v1.1-1.1.0.682-20220418.154759-1"
+    runtimeOnly "org.xerial:sqlite-jdbc:3.30.1"
+    implementation "mil.army.usace.hec:javaHeclib:7-HZ-win-x64@zip"
     implementation name: "FIRO_TSEnsembles-1.0.1"
     implementation "org.junit.jupiter:junit-jupiter:5.4.2"
-    implementation 'mil.army.usace.hec.wat:wat-hec-maps:dev-3.0.0.1856-20210504.234927-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat-hec:dev-3.0.0.1855-20210504.180613-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat-hecnf:dev-3.0.0.1855-20210504.180601-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat-hecnf-pluginapi:dev-3.0.0.1855-20210504.180607-1@jar'
-    implementation 'org.jdom:jdom:1.1'
-    implementation 'mil.army.usace.hec.wat:wat-rma:dev-3.0.0.1855-20210504.180620-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat-rmadev:dev-3.0.0.1855-20210504.180626-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat:dev-3.0.0.1855-20210504.180549-1@jar'
-    implementation 'mil.army.usace.hec.wat:wat-model:dev-3.0.0.1855-20210504.180555-1@jar'
-    implementation 'mil.army.usace.hec:javaHeclib:7-HZ-win-x64@zip'
-    implementation 'org.apache.commons:commons-lang3:3.11'
+    implementation "org.jdom:jdom:1.1"
+    implementation "org.apache.commons:commons-lang3:3.11"
+    implementation "mil.army.usace.hec.wat:wat-rma:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-hec-maps:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-hecnf:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-hecnf-pluginapi:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-rma:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-rmadev:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat:${wat_version}@jar"
+    implementation "mil.army.usace.hec.wat:wat-model:${wat_version}@jar"
 }
 //Testing
 test{
