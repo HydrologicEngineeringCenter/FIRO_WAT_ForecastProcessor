@@ -11,8 +11,6 @@ repositories {
         url "https://www.hec.usace.army.mil/nexus/repository/maven-public/"
     }
 }
-sourceCompatibility = '8'
-targetCompatibility = '8'
 
 def wat_version = "v1.1-1.1.0.682-SNAPSHOT"
 
