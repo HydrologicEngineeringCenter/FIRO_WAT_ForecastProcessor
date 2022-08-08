@@ -5,6 +5,7 @@ import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class SingleComputableDataLocation extends DataLocation {
@@ -26,6 +27,13 @@ public class SingleComputableDataLocation extends DataLocation {
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
+    @Override
+    public Element toXML(Element parent, Path root){
+        Element baseEl = super.toXML(parent, root);
+        baseEl.addContent(Serializer.toXML(computableThing));
+        return baseEl;
+    }
+
     public boolean fromXML(Element myElement) {
         super.fromXML(myElement);
         List<Object> childs = myElement.getChildren();

@@ -5,6 +5,7 @@ import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class MultiComputableDataLocation extends DataLocation {
@@ -29,6 +30,12 @@ public class MultiComputableDataLocation extends DataLocation {
     @Override
     public Element toXML(Element parent){
         Element baseEl = super.toXML(parent);
+        baseEl.addContent(Serializer.toXML(computableThing));
+        return baseEl;
+    }
+    @Override
+    public Element toXML(Element parent, Path root){
+        Element baseEl = super.toXML(parent, root);
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
