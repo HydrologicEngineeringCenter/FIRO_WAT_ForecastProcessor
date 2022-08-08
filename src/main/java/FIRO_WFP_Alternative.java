@@ -10,7 +10,6 @@ import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
-import hec.ensemble.stats.*;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
@@ -171,23 +170,19 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
 
     @Override
     public boolean saveData(RmaFile file){
-        //SAve data does not work because the override toXML on the unique Data locations is not working. They end up being serialized like a typical data location, leaving out data.
-        //saving has been disabled until a solution is found. There is no UI element to modify the alternative yet anyway. Once that exists, the rest will need to follow.
-//        if(file!=null){
-//            Element root = new Element(DocumentRoot);
-//            root.setAttribute(AlternativeNameAttribute,getName());
-//            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
-//            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
-//            if(_inputDataLocations!=null) {
-//                saveDataLocations(root, _inputDataLocations);}
-//            if(_outputDataLocations!=null) {
-//                saveOutputDataLocations(root, _outputDataLocations);}
-//            Document doc = new Document(root);
-//            return writeXMLFile(doc,file);
-//        }
-//        return false;
-        System.out.println("Saving the WFP Alternative is unsupported at this time. ");
-        return true;
+        if(file!=null){
+            Element root = new Element(DocumentRoot);
+            root.setAttribute(AlternativeNameAttribute,getName());
+            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
+            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
+            if(_inputDataLocations!=null) {
+                saveDataLocations(root, _inputDataLocations);}
+            if(_outputDataLocations!=null) {
+                saveOutputDataLocations(root, _outputDataLocations);}
+            Document doc = new Document(root);
+            return writeXMLFile(doc,file);
+        }
+        return false;
     }
 
     @Override
