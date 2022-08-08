@@ -1,3 +1,7 @@
+package HEC.WAT.ForecastProcessor.UI;
+
+import HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative;
+import HEC.WAT.ForecastProcessor.FIRO_WFP_PluginI18n;
 import com.rma.script.ScriptEditor;
 import com.rma.swing.RmaFileChooserField;
 import hec.gui.AbstractEditorPanel;
@@ -209,7 +213,7 @@ public class WfpAltPanel extends AbstractEditorPanel
 	public boolean savePanel(NamedType dobj)
 	{
 		FIRO_WFP_Alternative alt;
-		if ( dobj instanceof FIRO_WFP_Alternative )
+		if ( dobj instanceof FIRO_WFP_Alternative)
 		{
 			alt = (FIRO_WFP_Alternative) dobj;
 		}

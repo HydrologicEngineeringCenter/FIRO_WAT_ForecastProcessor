@@ -1,9 +1,10 @@
-/*
+package HEC.WAT.ForecastProcessor;/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
+import HEC.WAT.ForecastProcessor.UI.WfpAltEditor;
 import com.rma.client.Browser;
 import com.rma.factories.NewObjectFactory;
 import hec.model.OutputVariable;
@@ -12,7 +13,6 @@ import hec2.model.DataLocation;
 import hec2.model.ProgramOrderItem;
 import hec2.plugin.action.EditAction;
 import hec2.plugin.action.OutputElement;
-import hec2.plugin.action.PluginAction;
 import hec2.plugin.lang.ModelLinkingException;
 import hec2.plugin.lang.OutputException;
 import hec2.plugin.model.ModelAlternative;

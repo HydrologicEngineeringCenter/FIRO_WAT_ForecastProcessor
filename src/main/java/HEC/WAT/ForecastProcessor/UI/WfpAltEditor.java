@@ -1,3 +1,6 @@
+package HEC.WAT.ForecastProcessor.UI;
+
+import HEC.WAT.ForecastProcessor.FIRO_WFP_PluginI18n;
 import hec.gui.SelectorPanelEditor;
 import hec2.plugin.model.ModelAlternative;
 

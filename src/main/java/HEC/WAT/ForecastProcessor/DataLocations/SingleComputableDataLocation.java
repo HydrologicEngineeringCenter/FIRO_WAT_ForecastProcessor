@@ -1,6 +1,8 @@
+package HEC.WAT.ForecastProcessor.DataLocations;
+
 import hec.ensemble.stats.Computable;
-import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.Serializer;
+import hec.ensemble.stats.SingleComputable;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
@@ -8,23 +10,17 @@ import org.jdom.Element;
 import java.nio.file.Path;
 import java.util.List;
 
-public class MultiComputableDataLocation extends DataLocation {
-    private MultiComputable computableThing;
-    private boolean acrossTime = true;
-
-    public MultiComputable getComputableThing() {
+public class SingleComputableDataLocation extends DataLocation {
+    private SingleComputable computableThing;
+    public SingleComputable getComputableThing() {
         return computableThing;
     }
-    public boolean isAcrossTime() {
-        return acrossTime;
-    }
 
-    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing, boolean computeAcrossTime) {
+    public SingleComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, SingleComputable computableThing) {
         super(modelAlt, name, parameter);
         this.computableThing = computableThing;
-        this.acrossTime = computeAcrossTime;
     }
-    public MultiComputableDataLocation() {
+    public SingleComputableDataLocation() {
         super();
     }
     @Override
@@ -39,7 +35,7 @@ public class MultiComputableDataLocation extends DataLocation {
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
-    @Override
+
     public boolean fromXML(Element myElement) {
         super.fromXML(myElement);
         List<Object> childs = myElement.getChildren();
@@ -48,9 +44,16 @@ public class MultiComputableDataLocation extends DataLocation {
             if(childElement.getName().equals("ModelAlternative")){
                 continue;
             }
-            computableThing = Serializer.fromXML(childElement);
-            return true;
+            try{
+                computableThing = Serializer.fromXML(childElement);
+                return true;
+            }
+            catch (Exception ex){
+                System.out.println(ex);
+            }
+
         }
         return false;
     }
+
 }

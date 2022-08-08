@@ -1,4 +1,4 @@
-/*
+package HEC.WAT.ForecastProcessor.UI;/*
  * Copyright 2018  Hydrologic Engineering Center (HEC).
  * United States Army Corps of Engineers
  * All Rights Reserved.  HEC PROPRIETARY/CONFIDENTIAL.
@@ -7,6 +7,7 @@
  */
 
 
+import HEC.WAT.ForecastProcessor.FIRO_WFP_PluginI18n;
 import hec.heclib.dss.DSSPathname;
 import hec2.editors.DataLocationUserDefinedFieldEditor;
 import hec2.model.DataLocation;
@@ -220,7 +221,7 @@ public class DataLocationPanel extends RmaJPanel
 		}
 		String msg = FIRO_WFP_PluginI18n.getI18n(WfpMessages.DATALOCATION_PANEL_DELETE_LOC_MSG).getText();
 				//"Do you want to delete the selected DataLocations?";
-		String title =FIRO_WFP_PluginI18n.getI18n(WfpMessages.DATALOCATION_PANEL_DELETE_LOC_MSG_TITLE).getText();
+		String title = FIRO_WFP_PluginI18n.getI18n(WfpMessages.DATALOCATION_PANEL_DELETE_LOC_MSG_TITLE).getText();
 				//"Confirm Deletion";
 		int opt = JOptionPane.showConfirmDialog(this, msg, title, JOptionPane.YES_NO_OPTION);
 		if ( opt != JOptionPane.YES_OPTION)
