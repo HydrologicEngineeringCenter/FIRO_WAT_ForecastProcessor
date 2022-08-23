@@ -9,6 +9,7 @@ import HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation;
 import HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation;
 import com.rma.io.RmaFile;
 import hec.SqliteDatabase;
+import hec.dss.ensemble.DssDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -41,6 +42,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private static final String DatabaseName = "ensembles.db";
+    private static final String DssDatabaseName = "ensembles.db";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
@@ -109,6 +111,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String databaseName = getInputOutputDatabaseName();
         try {
             SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+            DssDatabase dssDatabase = new DssDatabase(getOutputDssDatabaseName());
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
@@ -116,6 +119,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
+                        dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
@@ -168,6 +172,16 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String runsDir;
         runsDir = _computeOptions.getRunDirectory();
         String databaseFullPath = runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
+        return databaseFullPath;
+    }
+    private String getOutputDssDatabaseName() {
+        //First Condition to make sure I can unit test this.
+        if(_computeOptions.getRunDirectory() == null){
+            return "src/test/resources/ensembles.dss";
+        }
+        String runsDir;
+        runsDir = _computeOptions.getRunDirectory();
+        String databaseFullPath = runsDir+ DssDatabaseName;
         return databaseFullPath;
     }
 
