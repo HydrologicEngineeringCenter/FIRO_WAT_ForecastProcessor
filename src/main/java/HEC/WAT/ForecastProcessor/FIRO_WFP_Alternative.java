@@ -44,7 +44,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private static final String DatabaseName = "ensembles.db";
-    private static final String DssDatabaseName = "ensembles.db";
+    private static final String DssDatabaseName = "ensembles.dss";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
@@ -121,7 +121,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
-                        //dssDatabase.write(mcts);
+                        dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
@@ -294,12 +294,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             for( float percentile : percentilesToCompute){
                 Computable percentileCompute = new PercentilesComputable(percentile);
                 SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
-                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days " + percentile + "%", "VOLUME",twoStep);
+                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),twoStep.StatisticsLabel(), "VOLUME",twoStep);
                 dlList.add(dl);
             }
             Computable meanCompute = new MeanComputable();
             SingleComputable twoStep = new TwoStepComputable(cumulative,meanCompute,false);
-            SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days" + " Mean", "VOLUME",twoStep);
+            SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(), twoStep.StatisticsLabel(), "VOLUME",twoStep);
             dlList.add(dl);
             return dlList;
         }

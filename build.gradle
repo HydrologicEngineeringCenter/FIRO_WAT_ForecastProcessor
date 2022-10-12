@@ -52,10 +52,12 @@ tasks.withType(Test) {
 group 'mil.army.usace.hec'
 version '1.0-SNAPSHOT'
 
+
+
 jar {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
     manifest {
-        attributes "WatPluginMainClass": "FIRO_WFP_Plugin"
+        attributes "WatPluginMainClass": "HEC.WAT.ForecastProcessor.FIRO_WFP_Plugin"
     }
 }
