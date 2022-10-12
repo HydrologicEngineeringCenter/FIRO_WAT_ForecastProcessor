@@ -1,4 +1,6 @@
-package HEC.WAT.ForecastProcessor;/*
+package HEC.WAT.ForecastProcessor;
+
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -119,7 +121,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
-                        dssDatabase.write(mcts);
+                        //dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
