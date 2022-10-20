@@ -17,7 +17,7 @@ import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
 import hec2.model.DataLocation;
-import hec2.plugin.model.ComputeOptions;
+import hec2.wat.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -32,20 +32,17 @@ import java.util.List;
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //region Fields
-    private String _pluginVersion;
     List<DataLocation> _inputDataLocations;
     List<DataLocation> _outputDataLocations ;
     String _timeStep;
     private static final String DocumentRoot = "HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative";
-    private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
-    private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private static final String DatabaseName = "ensembles.db";
     private static final String DssDatabaseName = "ensembles.dss";
-    private ComputeOptions _computeOptions;
+    private hec2.wat.model.ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
     //region Constructors
@@ -114,6 +111,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         try {
             SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
             DssDatabase dssDatabase = new DssDatabase(getOutputDssDatabaseName());
+            dssDatabase.setOverriddenFPart(_computeOptions.getFpart());
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
@@ -173,18 +171,15 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
         String runsDir;
         runsDir = _computeOptions.getRunDirectory();
-        String databaseFullPath = runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
-        return databaseFullPath;
+        return runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
+
     }
     private String getOutputDssDatabaseName() {
         //First Condition to make sure I can unit test this.
         if(_computeOptions.getRunDirectory() == null){
             return "src/test/resources/ensembles.dss";
         }
-        String runsDir;
-        runsDir = _computeOptions.getRunDirectory();
-        String databaseFullPath = runsDir+ DssDatabaseName;
-        return databaseFullPath;
+        return _computeOptions.getDssFilename();
     }
 
     @Override
