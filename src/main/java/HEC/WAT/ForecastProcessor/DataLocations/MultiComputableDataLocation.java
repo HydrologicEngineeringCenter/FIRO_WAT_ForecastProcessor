@@ -4,13 +4,14 @@ import hec.ensemble.stats.Computable;
 import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.Serializer;
 import hec2.model.DataLocation;
+import hec2.model.DssDataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
 import java.nio.file.Path;
 import java.util.List;
 
-public class MultiComputableDataLocation extends DataLocation {
+public class MultiComputableDataLocation extends DssDataLocation {
     private MultiComputable computableThing;
     private boolean acrossTime = true;
 
@@ -21,8 +22,8 @@ public class MultiComputableDataLocation extends DataLocation {
         return acrossTime;
     }
 
-    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing, boolean computeAcrossTime) {
-        super(modelAlt, name, parameter);
+    public MultiComputableDataLocation(String dssPath,String dssFile, MultiComputable computableThing, boolean computeAcrossTime) {
+        super(dssFile,dssPath);
         this.computableThing = computableThing;
         this.acrossTime = computeAcrossTime;
     }
