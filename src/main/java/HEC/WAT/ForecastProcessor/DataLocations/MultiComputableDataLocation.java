@@ -1,39 +1,46 @@
+package HEC.WAT.ForecastProcessor.DataLocations;
+
 import hec.ensemble.stats.Computable;
+import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.Serializer;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
+import java.nio.file.Path;
 import java.util.List;
 
-public class ComputableDataLocation extends DataLocation {
-    private Computable computableThing;
+public class MultiComputableDataLocation extends DataLocation {
+    private MultiComputable computableThing;
     private boolean acrossTime = true;
 
-    public Computable getComputableThing() {
+    public MultiComputable getComputableThing() {
         return computableThing;
     }
     public boolean isAcrossTime() {
         return acrossTime;
     }
 
-    public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing, boolean computeAcrossTime) {
+    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing, boolean computeAcrossTime) {
         super(modelAlt, name, parameter);
         this.computableThing = computableThing;
         this.acrossTime = computeAcrossTime;
     }
-
-    public ComputableDataLocation() {
+    public MultiComputableDataLocation() {
         super();
     }
-
     @Override
-    public org.jdom.Element toXML(Element parent) {
+    public Element toXML(Element parent){
         Element baseEl = super.toXML(parent);
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
-
+    @Override
+    public Element toXML(Element parent, Path root){
+        Element baseEl = super.toXML(parent, root);
+        baseEl.addContent(Serializer.toXML(computableThing));
+        return baseEl;
+    }
     @Override
     public boolean fromXML(Element myElement) {
         super.fromXML(myElement);
@@ -49,4 +56,3 @@ public class ComputableDataLocation extends DataLocation {
         return false;
     }
 }
-

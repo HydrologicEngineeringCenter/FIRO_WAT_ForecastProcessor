@@ -1,3 +1,5 @@
+import HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation;
+import HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation;
 import hec.ensemble.stats.*;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;

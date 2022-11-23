@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative Name="myName" Desc="myDescription" AlternativeFilename="C:\Programs\Git\Repos\FIRO_WAT_ForecastProcessor\src\test\resources\savedata.xml">
+  <DataLocations>
+    <DataLocation Name="ADOC" Class="hec2.model.DataLocation" ComputeType="Computed" Parameter="FLOW" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+    </DataLocation>
+  </DataLocations>
+  <OutputDataLocations>
+    <DataLocation Name="Cumulative 1 days 0.95%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.95]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.9%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.9]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.75%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.75]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.5%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.5]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.25%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.25]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.1%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.1]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days 0.05%" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.PercentilesComputable _percentiles="[0.05]" fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+    <DataLocation Name="Cumulative 1 days Mean" Class="HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation" ComputeType="Computed" Parameter="VOLUME" OutOfDate="false" PrevModelIndex="0">
+      <ModelAlternative Name="myName" />
+      <hec.ensemble.stats.TwoStepComputable _computeAcrossEnsembles="false">
+        <hec.ensemble.stats.NDayMultiComputable _day="1" fieldName="_stepOne">
+          <hec.ensemble.stats.CumulativeComputable fieldName="_stepOne" />
+        </hec.ensemble.stats.NDayMultiComputable>
+        <hec.ensemble.stats.MeanComputable fieldName="_stepTwo" />
+      </hec.ensemble.stats.TwoStepComputable>
+    </DataLocation>
+  </OutputDataLocations>
+</HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative>
+

@@ -1,37 +1,48 @@
+package HEC.WAT.ForecastProcessor.DataLocations;
+
 import hec.ensemble.stats.Computable;
-import hec.ensemble.stats.MultiComputable;
 import hec.ensemble.stats.Serializer;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
+import java.nio.file.Path;
 import java.util.List;
 
-public class MultiComputableDataLocation extends DataLocation {
-    private MultiComputable computableThing;
+public class ComputableDataLocation extends DataLocation {
+    private Computable computableThing;
     private boolean acrossTime = true;
 
-    public MultiComputable getComputableThing() {
+    public Computable getComputableThing() {
         return computableThing;
     }
     public boolean isAcrossTime() {
         return acrossTime;
     }
 
-    public MultiComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, MultiComputable computableThing, boolean computeAcrossTime) {
+    public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing, boolean computeAcrossTime) {
         super(modelAlt, name, parameter);
         this.computableThing = computableThing;
         this.acrossTime = computeAcrossTime;
     }
-    public MultiComputableDataLocation() {
+
+    public ComputableDataLocation() {
         super();
     }
+
     @Override
-    public Element toXML(Element parent){
+    public org.jdom.Element toXML(Element parent) {
         Element baseEl = super.toXML(parent);
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
+    @Override
+    public Element toXML(Element parent, Path root){
+        Element baseEl = super.toXML(parent, root);
+        baseEl.addContent(Serializer.toXML(computableThing));
+        return baseEl;
+    }
+
     @Override
     public boolean fromXML(Element myElement) {
         super.fromXML(myElement);
@@ -47,3 +58,4 @@ public class MultiComputableDataLocation extends DataLocation {
         return false;
     }
 }
+

@@ -1,16 +1,21 @@
+package HEC.WAT.ForecastProcessor;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
+import HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation;
+import HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation;
+import HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation;
 import com.rma.io.RmaFile;
 import hec.SqliteDatabase;
+import hec.dss.ensemble.DssDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
-import hec.ensemble.stats.*;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
@@ -31,7 +36,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     List<DataLocation> _inputDataLocations;
     List<DataLocation> _outputDataLocations ;
     String _timeStep;
-    private static final String DocumentRoot = "FIRO_WFP_Alternative";
+    private static final String DocumentRoot = "HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative";
     private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
@@ -39,6 +44,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private static final String DatabaseName = "ensembles.db";
+    private static final String DssDatabaseName = "ensembles.db";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
@@ -107,6 +113,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String databaseName = getInputOutputDatabaseName();
         try {
             SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+            DssDatabase dssDatabase = new DssDatabase(getOutputDssDatabaseName());
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
@@ -114,6 +121,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
+                        //dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
@@ -125,7 +133,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private MetricCollectionTimeSeries computeMetrics(EnsembleTimeSeries ensembleTimeSeries, DataLocation outDataLocation, String classname) throws Exception {
         MetricCollectionTimeSeries mcts = null;
         switch (classname){
-            case "MultiComputableDataLocation":
+            case "HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation":
                 MultiComputableDataLocation mcdl = ((MultiComputableDataLocation)outDataLocation);
                 MultiComputable msc = mcdl.getComputableThing();
                 if(mcdl.isAcrossTime()){
@@ -136,13 +144,13 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 }
                 break;
 
-            case "SingleComputableDataLocation":
+            case "HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation":
                 SingleComputableDataLocation sdl = ((SingleComputableDataLocation)outDataLocation);
                 SingleComputable sc = sdl.getComputableThing();
                 mcts = ensembleTimeSeries.computeSingleValueSummary(sc);
                 break;
 
-            case "ComputableDataLocation":
+            case "HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation":
                 ComputableDataLocation cdl = ((ComputableDataLocation)outDataLocation);
                 Computable c = cdl.getComputableThing();
                 if(cdl.isAcrossTime()){
@@ -168,26 +176,32 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String databaseFullPath = runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
         return databaseFullPath;
     }
+    private String getOutputDssDatabaseName() {
+        //First Condition to make sure I can unit test this.
+        if(_computeOptions.getRunDirectory() == null){
+            return "src/test/resources/ensembles.dss";
+        }
+        String runsDir;
+        runsDir = _computeOptions.getRunDirectory();
+        String databaseFullPath = runsDir+ DssDatabaseName;
+        return databaseFullPath;
+    }
 
     @Override
     public boolean saveData(RmaFile file){
-        //SAve data does not work because the override toXML on the unique Data locations is not working. They end up being serialized like a typical data location, leaving out data.
-        //saving has been disabled until a solution is found. There is no UI element to modify the alternative yet anyway. Once that exists, the rest will need to follow.
-//        if(file!=null){
-//            Element root = new Element(DocumentRoot);
-//            root.setAttribute(AlternativeNameAttribute,getName());
-//            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
-//            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
-//            if(_inputDataLocations!=null) {
-//                saveDataLocations(root, _inputDataLocations);}
-//            if(_outputDataLocations!=null) {
-//                saveOutputDataLocations(root, _outputDataLocations);}
-//            Document doc = new Document(root);
-//            return writeXMLFile(doc,file);
-//        }
-//        return false;
-        System.out.println("Saving the WFP Alternative is unsupported at this time. ");
-        return true;
+        if(file!=null){
+            Element root = new Element(DocumentRoot);
+            root.setAttribute(AlternativeNameAttribute,getName());
+            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
+            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
+            if(_inputDataLocations!=null) {
+                saveDataLocations(root, _inputDataLocations);}
+            if(_outputDataLocations!=null) {
+                saveOutputDataLocations(root, _outputDataLocations);}
+            Document doc = new Document(root);
+            return writeXMLFile(doc,file);
+        }
+        return false;
     }
 
     @Override
@@ -198,17 +212,17 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             //Get the data location type
             String dataLocationtype = outputEle.getAttributeValue("Class");
             switch (dataLocationtype) {
-                case "ComputableDataLocation":
+                case "HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation":
                     DataLocation cdl = new ComputableDataLocation();
                     cdl.fromXML(outputEle);
                     outputDataLocations.add(cdl);
                     break;
-                case "MultiComputableDataLocation":
+                case "HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation":
                     DataLocation mcl = new MultiComputableDataLocation();
                     mcl.fromXML(outputEle);
                     outputDataLocations.add(mcl);
                     break;
-                case "SingleComputableDataLocation":
+                case "HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation":
                     DataLocation scdl = new SingleComputableDataLocation();
                     scdl.fromXML(outputEle);
                     outputDataLocations.add(scdl);
@@ -225,7 +239,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
 
     @Override
-    protected boolean loadDocument(org.jdom.Document dcmnt) {
+    public boolean loadDocument(org.jdom.Document dcmnt) {
         if(dcmnt!=null){
             org.jdom.Element ele = dcmnt.getRootElement();
             if(ele==null){
@@ -239,7 +253,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 RmaFile file = new RmaFile(val);
                 setFile(file);
             }else{
-                System.out.println("XML document root was imporoperly named.");
+                System.out.println("XML document root was named " + ele.getName() + " but we expected " + DocumentRoot);
                 return false;
             }
             if(_inputDataLocations ==null){

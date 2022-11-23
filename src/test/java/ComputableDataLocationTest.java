@@ -1,9 +1,8 @@
+import HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation;
 import hec.ensemble.stats.*;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ComputableDataLocationTest {
     Computable maxAccumDuration = new MaxAccumDuration(3);
