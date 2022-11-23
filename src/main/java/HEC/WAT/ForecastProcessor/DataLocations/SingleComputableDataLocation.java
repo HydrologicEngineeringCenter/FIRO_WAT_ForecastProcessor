@@ -40,23 +40,8 @@ public class SingleComputableDataLocation extends DssDataLocation {
 
     @Override
     public boolean fromXML(Element myElement) {
-        super.fromXML(myElement);
-        List<Object> childs = myElement.getChildren();
-        for (Object child : childs) {
-            Element childElement = (Element) child;
-            if(childElement.getName().equals("ModelAlternative")){
-                continue;
-            }
-            try{
-                computableThing = Serializer.fromXML(childElement);
-                return true;
-            }
-            catch (Exception ex){
-                System.out.println(ex);
-            }
-
-        }
-        return false;
+        super.fromXML(myElement); // this is just going to call this.fromXML(Element e, Path p) below
+        return true;
     }
 
     @Override
@@ -65,17 +50,10 @@ public class SingleComputableDataLocation extends DssDataLocation {
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            if(childElement.getName().equals("ModelAlternative")){
-                continue;
-            }
-            try{
+            if(childElement.getName().contains("hec.ensemble.stats")){
                 computableThing = Serializer.fromXML(childElement);
                 return true;
             }
-            catch (Exception ex){
-                System.out.println(ex);
-            }
-
         }
         return false;
     }

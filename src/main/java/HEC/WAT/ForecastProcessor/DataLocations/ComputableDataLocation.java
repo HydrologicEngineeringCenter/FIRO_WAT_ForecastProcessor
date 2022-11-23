@@ -50,11 +50,11 @@ public class ComputableDataLocation extends DssDataLocation {
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            if(childElement.getName().equals("ModelAlternative")){
-                continue;
+            if(childElement.getName().contains("hec.ensemble.stats")){
+                computableThing = Serializer.fromXML(childElement);
+                return true;
             }
-            computableThing = Serializer.fromXML(childElement);
-            return true;
+
         }
         return false;
     }
