@@ -33,8 +33,8 @@ import java.util.List;
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //region Fields
-    List<DataLocation> _inputDataLocations;
-    List<DataLocation> _outputDataLocations ;
+    List<DataLocation> _inputDataLocations = new ArrayList<>();
+    List<DataLocation> _outputDataLocations = new ArrayList<>();
     String _timeStep;
     private static final String DocumentRoot = "HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative";
     private static final String AlternativeNameAttribute = "Name";
@@ -62,21 +62,17 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     public List<DataLocation> getInputDataLocations(){
         //construct input data locations.
-        if(_inputDataLocations==null ||_inputDataLocations.isEmpty()){
-            _inputDataLocations = defaultInputDataLocations();
+        if(_inputDataLocations.isEmpty()){
+            defaultInputDataLocations();
         }
         return _inputDataLocations;
     }
     public List<DataLocation> getOutputDataLocations(){
         //construct input data locations.
-        if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
-            _outputDataLocations = defaultOutputDataLocations();
+        if(_outputDataLocations.isEmpty()){
+            defaultOutputDataLocations();
         }
-        List<DataLocation> outputAsDataLoc = new ArrayList<DataLocation>();
-        for(DataLocation dl : _outputDataLocations){
-            outputAsDataLoc.add(dl);
-        }
-        return outputAsDataLoc;
+        return _outputDataLocations;
     }
     public List<OutputVariable> getOutputVariables(){
         return _outputVariables;
@@ -253,18 +249,10 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 System.out.println("XML document root was named " + ele.getName() + " but we expected " + DocumentRoot);
                 return false;
             }
-            if(_inputDataLocations ==null){
-                _inputDataLocations = new ArrayList<>();
-            }
             _inputDataLocations.clear();
-            loadDataLocations(ele, _inputDataLocations) ;
-
-            if(_outputDataLocations ==null){
-                _outputDataLocations = new ArrayList<>();
-            }
             _outputDataLocations.clear();
+            loadDataLocations(ele, _inputDataLocations) ;
             loadOutputDataLocations(ele, _outputDataLocations );
-
             setModified(false);
             return true;
         }else{
@@ -278,18 +266,17 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
 
 //These guys are just here for testing. We wouldn't really want default input and output data locations
-    public List<DataLocation> defaultInputDataLocations() {
-        List<DssDataLocation> dlList = new ArrayList<>();
+    //Use one source of truth
+    public void defaultInputDataLocations() {
         //create datalocations for each location of interest, so that it can be linked to output from other models.
         String pathname = GetDssPathnameForDataLocation("ADOC", "FLOW");
         String file = "SomeDssFile.dss";
         DssDataLocation Inflow = new DssDataLocation(file,pathname);
-        dlList.add(Inflow);
-        List<DataLocation> convertedList = new ArrayList<DataLocation>(dlList);
-        return convertedList;
+        _inputDataLocations.add(Inflow);
+
     }
-    public List<DataLocation> defaultOutputDataLocations() {
-        List<DssDataLocation> dlList = new ArrayList<>();
+    //populates output data locations when they are empty
+    public void defaultOutputDataLocations() {
         float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
         MultiComputable cumulativeComputable = new CumulativeComputable();
         int[] daysToCompute = new int[]{1,2,3};
@@ -300,19 +287,15 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 Computable percentileCompute = new PercentilesComputable(percentile);
                 SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
                 String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
-                SingleComputableDataLocation dl = new SingleComputableDataLocation(file,path,twoStep);
-                dlList.add(dl);
+                SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
+                _outputDataLocations.add(dl);
             }
             Computable meanCompute = new MeanComputable();
             SingleComputable twoStep = new TwoStepComputable(cumulative,meanCompute,false);
             String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
-            SingleComputableDataLocation dl = new SingleComputableDataLocation(file,path,twoStep);
-            dlList.add(dl);
-            List<DataLocation> convertedList = new ArrayList<>(dlList);
-            return convertedList;
+            SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
+            _outputDataLocations.add(dl);
         }
-        List<DataLocation> convertedList = new ArrayList<>(dlList);
-        return convertedList;
     }
 
     public void setInputDataLocations(List<DataLocation> locs) {
