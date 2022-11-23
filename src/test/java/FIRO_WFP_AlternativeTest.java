@@ -47,7 +47,7 @@ class FIRO_WFP_AlternativeTest {
         Document doc = sax.build(new File("src/test/resources/savedata.xml"));
         assertTrue(tmpAlt.loadDocument(doc));
         int expectedInputs = 1;
-        int expectedOutputs = 8;
+        int expectedOutputs = 24;
         int actualInputs = tmpAlt.getInputDataLocations().size();
         int actualOutputs = tmpAlt.getOutputDataLocations().size();
         assertEquals(expectedInputs,actualInputs);
