@@ -3,13 +3,14 @@ package HEC.WAT.ForecastProcessor.DataLocations;
 import hec.ensemble.stats.Computable;
 import hec.ensemble.stats.Serializer;
 import hec2.model.DataLocation;
+import hec2.model.DssDataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
 import java.nio.file.Path;
 import java.util.List;
 
-public class ComputableDataLocation extends DataLocation {
+public class ComputableDataLocation extends DssDataLocation {
     private Computable computableThing;
     private boolean acrossTime = true;
 
@@ -20,8 +21,8 @@ public class ComputableDataLocation extends DataLocation {
         return acrossTime;
     }
 
-    public ComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, Computable computableThing, boolean computeAcrossTime) {
-        super(modelAlt, name, parameter);
+    public ComputableDataLocation(String dssPath,String dssFile, Computable computableThing, boolean computeAcrossTime) {
+        super(dssFile,dssPath);
         this.computableThing = computableThing;
         this.acrossTime = computeAcrossTime;
     }
@@ -49,11 +50,11 @@ public class ComputableDataLocation extends DataLocation {
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            if(childElement.getName().equals("ModelAlternative")){
-                continue;
+            if(childElement.getName().contains("hec.ensemble.stats")){
+                computableThing = Serializer.fromXML(childElement);
+                return true;
             }
-            computableThing = Serializer.fromXML(childElement);
-            return true;
+
         }
         return false;
     }

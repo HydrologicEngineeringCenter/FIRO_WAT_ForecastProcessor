@@ -8,8 +8,10 @@ import org.junit.jupiter.api.Test;
 class MultiComputableDataLocationTest {
     Statistics[] stats = new Statistics[]{Statistics.MAX, Statistics.AVERAGE, Statistics.MIN};
     MultiComputable multiStatComputable = new MultiStatComputable(stats);
+    String dssPath = "SomeDSSPAth";
+    String dssFile = "SomeDSSFilePath";
 
-    MultiComputableDataLocation cdl = new MultiComputableDataLocation(new ModelAlternative(),"Popeye","Flow",multiStatComputable,false);
+    MultiComputableDataLocation cdl = new MultiComputableDataLocation(dssPath,dssFile,multiStatComputable,false);
     Element parent = new Element("OutputDataLocations");
     @Test
     void toXML() {

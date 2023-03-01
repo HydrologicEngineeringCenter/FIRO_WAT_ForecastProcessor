@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 
 class ComputableDataLocationTest {
     Computable maxAccumDuration = new MaxAccumDuration(3);
-    ComputableDataLocation cdl = new ComputableDataLocation(new ModelAlternative(),"Popeye","Flow",maxAccumDuration,false);
+    String dssPath = "SomeDSSPAth";
+    String dssFile = "SomeDSSFilePath";
+    ComputableDataLocation cdl = new ComputableDataLocation(dssPath,dssFile,maxAccumDuration,true);
     Element parent = new Element("OutputDataLocations");
 
     @Test

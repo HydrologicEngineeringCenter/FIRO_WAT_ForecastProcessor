@@ -6,8 +6,9 @@ import org.junit.jupiter.api.Test;
 
 class SingleComputableDataLocationTest {
     SingleComputable twostep = new TwoStepComputable(new MaxComputable(),new MeanComputable(), true);
-
-    SingleComputableDataLocation cdl = new SingleComputableDataLocation(new ModelAlternative(),"Popeye","Flow",twostep);
+    String dssPath = "SomeDSSPAth";
+    String dssFile = "SomeDSSFilePath";
+    SingleComputableDataLocation cdl = new SingleComputableDataLocation(dssFile,dssPath,twostep);
     Element parent = new Element("OutputDataLocations");
     @Test
     void toXML() {

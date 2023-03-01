@@ -17,7 +17,8 @@ import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
 import hec2.model.DataLocation;
-import hec2.plugin.model.ComputeOptions;
+import hec2.model.DssDataLocation;
+import hec2.wat.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -32,20 +33,17 @@ import java.util.List;
  */
 public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //region Fields
-    private String _pluginVersion;
-    List<DataLocation> _inputDataLocations;
-    List<DataLocation> _outputDataLocations ;
+    List<DataLocation> _inputDataLocations = new ArrayList<>();
+    List<DataLocation> _outputDataLocations = new ArrayList<>();
     String _timeStep;
     private static final String DocumentRoot = "HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative";
-    private static final String OutputVariableElement = "OutputVariables";
     private static final String AlternativeNameAttribute = "Name";
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
-    private static final String OutputDataLocationsChildElement = "OutputDataLocation";
     private static final String DatabaseName = "ensembles.db";
-    private static final String DssDatabaseName = "ensembles.db";
-    private ComputeOptions _computeOptions;
+    private static final String DssDatabaseName = "ensembles.dss";
+    private hec2.wat.model.ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
     //endregion
     //region Constructors
@@ -64,21 +62,17 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     public List<DataLocation> getInputDataLocations(){
         //construct input data locations.
-        if(_inputDataLocations==null ||_inputDataLocations.isEmpty()){
-            _inputDataLocations = defaultInputDataLocations();
+        if(_inputDataLocations.isEmpty()){
+            defaultInputDataLocations();
         }
         return _inputDataLocations;
     }
     public List<DataLocation> getOutputDataLocations(){
         //construct input data locations.
-        if(_outputDataLocations== null || _outputDataLocations.isEmpty()){
-            _outputDataLocations = defaultOutputDataLocations();
+        if(_outputDataLocations.isEmpty()){
+            defaultOutputDataLocations();
         }
-        List<DataLocation> outputAsDataLoc = new ArrayList<DataLocation>();
-        for(DataLocation dl : _outputDataLocations){
-            outputAsDataLoc.add(dl);
-        }
-        return outputAsDataLoc;
+        return _outputDataLocations;
     }
     public List<OutputVariable> getOutputVariables(){
         return _outputVariables;
@@ -110,10 +104,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     //endregion
     @Override
     public boolean compute() {
-        String databaseName = getInputOutputDatabaseName();
+        String sqliteDatabaseName = getInputOutputDatabaseName();
+        String dssDatabaseName = getOutputDssDatabaseName();
         try {
-            SqliteDatabase database = new SqliteDatabase(databaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
-            DssDatabase dssDatabase = new DssDatabase(getOutputDssDatabaseName());
+            SqliteDatabase database = new SqliteDatabase(sqliteDatabaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
+            DssDatabase dssDatabase = new DssDatabase(dssDatabaseName);
+            dssDatabase.setOverriddenFPart(_computeOptions.getFpart());
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
@@ -121,7 +117,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
-                        //dssDatabase.write(mcts);
+                        dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
@@ -173,18 +169,15 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
         String runsDir;
         runsDir = _computeOptions.getRunDirectory();
-        String databaseFullPath = runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
-        return databaseFullPath;
+        return runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
+
     }
     private String getOutputDssDatabaseName() {
         //First Condition to make sure I can unit test this.
         if(_computeOptions.getRunDirectory() == null){
             return "src/test/resources/ensembles.dss";
         }
-        String runsDir;
-        runsDir = _computeOptions.getRunDirectory();
-        String databaseFullPath = runsDir+ DssDatabaseName;
-        return databaseFullPath;
+        return _computeOptions.getDssFilename();
     }
 
     @Override
@@ -194,10 +187,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             root.setAttribute(AlternativeNameAttribute,getName());
             root.setAttribute(AlternativeDescriptionAttribute,getDescription());
             root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
-            if(_inputDataLocations!=null) {
-                saveDataLocations(root, _inputDataLocations);}
-            if(_outputDataLocations!=null) {
-                saveOutputDataLocations(root, _outputDataLocations);}
+            saveDataLocations(root, _inputDataLocations);
+            saveOutputDataLocations(root, _outputDataLocations);
             Document doc = new Document(root);
             return writeXMLFile(doc,file);
         }
@@ -256,18 +247,10 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 System.out.println("XML document root was named " + ele.getName() + " but we expected " + DocumentRoot);
                 return false;
             }
-            if(_inputDataLocations ==null){
-                _inputDataLocations = new ArrayList<>();
-            }
             _inputDataLocations.clear();
-            loadDataLocations(ele, _inputDataLocations);
-
-            if(_outputDataLocations ==null){
-                _outputDataLocations = new ArrayList<>();
-            }
             _outputDataLocations.clear();
-            loadOutputDataLocations(ele, _outputDataLocations);
-
+            loadDataLocations(ele, _inputDataLocations) ;
+            loadOutputDataLocations(ele, _outputDataLocations );
             setModified(false);
             return true;
         }else{
@@ -276,34 +259,41 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         }
     }
 
-//These guys are just here for testing. We wouldn't really want default input and output data locations
-    public List<DataLocation> defaultInputDataLocations() {
-        List<DataLocation> dlList = new ArrayList<>();
-        //create datalocations for each location of interest, so that it can be linked to output from other models.
-        DataLocation Inflow = new DataLocation(this.getModelAlt(),"ADOC","FLOW");
-        dlList.add(Inflow);
-        return dlList;
+    private String GetDssPathnameForDataLocation(String location, String statisticsLabel){
+        return "" + '/' + location + '/' + statisticsLabel + '/' + "" + '/' + "" + '/' + "";
     }
-    public List<DataLocation> defaultOutputDataLocations() {
-        List<DataLocation> dlList = new ArrayList<>();
+
+//These guys are just here for testing. We wouldn't really want default input and output data locations
+    //Use one source of truth
+    public void defaultInputDataLocations() {
+        //create datalocations for each location of interest, so that it can be linked to output from other models.
+        String pathname = GetDssPathnameForDataLocation("ADOC", "FLOW");
+        String file = "SomeDssFile.dss";
+        DssDataLocation Inflow = new DssDataLocation(file,pathname);
+        _inputDataLocations.add(Inflow);
+
+    }
+    //populates output data locations when they are empty
+    public void defaultOutputDataLocations() {
         float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
         MultiComputable cumulativeComputable = new CumulativeComputable();
         int[] daysToCompute = new int[]{1,2,3};
+        String file = "SomeDssFile.dss";
         for( int days : daysToCompute){
             Computable cumulative = new NDayMultiComputable(cumulativeComputable,days);
             for( float percentile : percentilesToCompute){
                 Computable percentileCompute = new PercentilesComputable(percentile);
                 SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
-                SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days " + percentile + "%", "VOLUME",twoStep);
-                dlList.add(dl);
+                String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
+                SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
+                _outputDataLocations.add(dl);
             }
             Computable meanCompute = new MeanComputable();
             SingleComputable twoStep = new TwoStepComputable(cumulative,meanCompute,false);
-            SingleComputableDataLocation dl = new SingleComputableDataLocation(this.getModelAlt(),"Cumulative " + days + " days" + " Mean", "VOLUME",twoStep);
-            dlList.add(dl);
-            return dlList;
+            String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
+            SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
+            _outputDataLocations.add(dl);
         }
-        return dlList;
     }
 
     public void setInputDataLocations(List<DataLocation> locs) {

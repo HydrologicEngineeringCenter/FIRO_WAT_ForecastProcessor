@@ -1,34 +1,36 @@
 package HEC.WAT.ForecastProcessor.DataLocations;
 
-import hec.ensemble.stats.Computable;
 import hec.ensemble.stats.Serializer;
 import hec.ensemble.stats.SingleComputable;
 import hec2.model.DataLocation;
+import hec2.model.DssDataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
 import java.nio.file.Path;
 import java.util.List;
 
-public class SingleComputableDataLocation extends DataLocation {
+public class SingleComputableDataLocation extends DssDataLocation {
     private SingleComputable computableThing;
     public SingleComputable getComputableThing() {
         return computableThing;
     }
 
-    public SingleComputableDataLocation(ModelAlternative modelAlt, String name, String parameter, SingleComputable computableThing) {
-        super(modelAlt, name, parameter);
+    public SingleComputableDataLocation(String dssPath,String dssFile, SingleComputable computableThing) {
+        super(dssFile,dssPath);
         this.computableThing = computableThing;
     }
     public SingleComputableDataLocation() {
         super();
     }
+
     @Override
     public Element toXML(Element parent){
         Element baseEl = super.toXML(parent);
         baseEl.addContent(Serializer.toXML(computableThing));
         return baseEl;
     }
+
     @Override
     public Element toXML(Element parent, Path root){
         Element baseEl = super.toXML(parent, root);
@@ -36,22 +38,22 @@ public class SingleComputableDataLocation extends DataLocation {
         return baseEl;
     }
 
+    @Override
     public boolean fromXML(Element myElement) {
-        super.fromXML(myElement);
+        super.fromXML(myElement); // this is just going to call this.fromXML(Element e, Path p) below
+        return true;
+    }
+
+    @Override
+    public boolean fromXML(Element myElement, Path root) {
+        super.fromXML(myElement,root);
         List<Object> childs = myElement.getChildren();
         for (Object child : childs) {
             Element childElement = (Element) child;
-            if(childElement.getName().equals("ModelAlternative")){
-                continue;
-            }
-            try{
+            if(childElement.getName().contains("hec.ensemble.stats")){
                 computableThing = Serializer.fromXML(childElement);
                 return true;
             }
-            catch (Exception ex){
-                System.out.println(ex);
-            }
-
         }
         return false;
     }
