@@ -11,7 +11,6 @@ import HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation;
 import HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation;
 import com.rma.io.RmaFile;
 import hec.SqliteDatabase;
-import hec.dss.ensemble.DssDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
 import hec.metrics.MetricCollectionTimeSeries;
@@ -108,8 +107,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         String dssDatabaseName = getOutputDssDatabaseName();
         try {
             SqliteDatabase database = new SqliteDatabase(sqliteDatabaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
-            DssDatabase dssDatabase = new DssDatabase(dssDatabaseName);
-            dssDatabase.setOverriddenFPart(_computeOptions.getFpart());
             for (DataLocation inputDataLocation : _inputDataLocations) {
                 hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(inputDataLocation.getName(), inputDataLocation.getParameter());
                 EnsembleTimeSeries ensembleTimeSeries = database.getEnsembleTimeSeries(timeSeriesIdentifier);
@@ -117,7 +114,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         String className = outDataLocation.getClass().getName();
                         MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries,  outDataLocation, className);
                         database.write(mcts);
-                        dssDatabase.write(mcts);
                 }
             }
         } catch (Exception e) {
