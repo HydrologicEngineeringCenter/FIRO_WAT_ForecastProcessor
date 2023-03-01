@@ -187,10 +187,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             root.setAttribute(AlternativeNameAttribute,getName());
             root.setAttribute(AlternativeDescriptionAttribute,getDescription());
             root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
-            if(_inputDataLocations!=null) {
-                saveDataLocations(root, _inputDataLocations);}
-            if(_outputDataLocations!=null) {
-                saveOutputDataLocations(root, _outputDataLocations);}
+            saveDataLocations(root, _inputDataLocations);
+            saveOutputDataLocations(root, _outputDataLocations);
             Document doc = new Document(root);
             return writeXMLFile(doc,file);
         }
