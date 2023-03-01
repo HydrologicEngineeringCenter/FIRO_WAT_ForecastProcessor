@@ -1,3 +1,7 @@
 /.gradle/checksums/checksums.lock
 /.gradle/
 /.idea/
+/build/
+src/test/resources/savedata.xml.bak
+src/test/resources/savedata.xml
+src/test/resources/ensembles.db
