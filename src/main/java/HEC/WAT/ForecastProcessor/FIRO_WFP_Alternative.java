@@ -172,8 +172,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
 
     public static String buildPathToDBFile(String runsDir,int realNum, int lifecycleNum, int eventNum, String databaseName){
-        return runsDir + File.separator + "realization " + realNum +File.separator+"lifecycle " + lifecycleNum +
-                File.separator + "event " + eventNum + File.separator+ databaseName;
+        return runsDir + "\\" + "realization " + realNum + "\\" +"lifecycle " + lifecycleNum +
+                "\\" + "event " + eventNum + "\\"+ databaseName;
     }
 
     @Override
