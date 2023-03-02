@@ -72,7 +72,9 @@ class FIRO_WFP_AlternativeTest {
         //act
         String actual = FIRO_WFP_Alternative.buildPathToDBFile(runsDir,real,life,event,DatabaseName);
         //assert
-        assertEquals(expected,actual);
+        System.out.println("expected: " + expected);
+        System.out.println("actual: " + actual);
+        assertEquals(actual, expected);
     }
 
     @AfterEach
