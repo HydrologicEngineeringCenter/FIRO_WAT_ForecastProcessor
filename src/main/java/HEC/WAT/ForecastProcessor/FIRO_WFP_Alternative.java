@@ -104,7 +104,6 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     @Override
     public boolean compute() {
         String sqliteDatabaseName = getInputOutputDatabaseName();
-        String dssDatabaseName = getOutputDssDatabaseName();
         try {
             SqliteDatabase database = new SqliteDatabase(sqliteDatabaseName, SqliteDatabase.CREATION_MODE.CREATE_NEW_OR_OPEN_EXISTING_UPDATE);
             for (DataLocation inputDataLocation : _inputDataLocations) {
@@ -163,17 +162,18 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         if(_computeOptions.getRunDirectory() == null){
             return "src/test/resources/ensembles.db";
         }
-        String runsDir;
-        runsDir = _computeOptions.getRunDirectory();
-        return runsDir.replace("FIRO_WFP"+ File.separator,DatabaseName);
+        String runsDir = _computeOptions.getRunDirectory();
+        int realizationNum = _computeOptions.getCurrentRealizationNumber();
+        int lifecycleNum = _computeOptions.getCurrentLifecycleNumber();
+        int eventNum = _computeOptions.getCurrentEventNumber();
+
+        return buildPathToDBFile(runsDir,realizationNum,lifecycleNum,eventNum,DatabaseName);
 
     }
-    private String getOutputDssDatabaseName() {
-        //First Condition to make sure I can unit test this.
-        if(_computeOptions.getRunDirectory() == null){
-            return "src/test/resources/ensembles.dss";
-        }
-        return _computeOptions.getDssFilename();
+
+    public static String buildPathToDBFile(String runsDir,int realNum, int lifecycleNum, int eventNum, String databaseName){
+        return runsDir + File.separator + "realization " + realNum +File.separator+"lifecycle " + lifecycleNum +
+                File.separator + "event " + eventNum + File.separator+ databaseName;
     }
 
     @Override
@@ -259,7 +259,28 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return "" + '/' + location + '/' + statisticsLabel + '/' + "" + '/' + "" + '/' + "";
     }
 
-//These guys are just here for testing. We wouldn't really want default input and output data locations
+    public void setInputDataLocations(List<DataLocation> locs) {
+        _inputDataLocations.clear();
+        _inputDataLocations.addAll(locs);
+    }
+
+    public void setOutputDataLocations(List<DataLocation> locs) {
+        _outputDataLocations.clear();
+        _outputDataLocations.addAll(locs);
+    }
+
+    public void setTimeStep(String timeStep)
+    {
+            _timeStep = timeStep;
+    }
+
+    public String getTimeStep()
+    {
+        return _timeStep;
+    }
+
+    //region Testing Data
+    //These guys are just here for testing. We wouldn't really want default input and output data locations
     //Use one source of truth
     public void defaultInputDataLocations() {
         //create datalocations for each location of interest, so that it can be linked to output from other models.
@@ -291,25 +312,5 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             _outputDataLocations.add(dl);
         }
     }
-
-    public void setInputDataLocations(List<DataLocation> locs) {
-        _inputDataLocations.clear();
-        _inputDataLocations.addAll(locs);
-    }
-
-    public void setOutputDataLocations(List<DataLocation> locs) {
-        _outputDataLocations.clear();
-        _outputDataLocations.addAll(locs);
-    }
-
-    public void setTimeStep(String timeStep)
-    {
-            _timeStep = timeStep;
-    }
-
-    public String getTimeStep()
-    {
-        return _timeStep;
-    }
-
+    //endregion
 }

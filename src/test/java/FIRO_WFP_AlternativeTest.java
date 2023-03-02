@@ -1,5 +1,6 @@
 import HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative;
 import com.rma.io.RmaFile;
+import hec.data.location.Alternative;
 import hec2.model.DataLocation;
 import hec2.wat.model.ComputeOptions;
 import org.jdom.Document;
@@ -57,6 +58,21 @@ class FIRO_WFP_AlternativeTest {
         Document doc = sax.build(new File("src/test/resources/PradoMetricsBackup.xml"));
         _alt.loadDocument(doc);
         assertTrue(_alt.compute());
+    }
+
+    @Test
+    void buildPathToDBFile(){
+        //arrange
+        String runsDir = "D:\\FIRO\\Evan's Test Data\\RTestTWM";
+        int real = 1;
+        int life = 1;
+        int event = 1;
+        String DatabaseName = "ensembles.db";
+        String expected = "D:\\FIRO\\Evan's Test Data\\RTestTWM\\realization 1\\lifecycle 1\\event 1\\ensembles.db";
+        //act
+        String actual = FIRO_WFP_Alternative.buildPathToDBFile(runsDir,real,life,event,DatabaseName);
+        //assert
+        assertEquals(expected,actual);
     }
 
     @AfterEach
