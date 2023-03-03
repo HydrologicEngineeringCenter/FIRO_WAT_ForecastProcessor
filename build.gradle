@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 //Dependency Management
 repositories {
@@ -47,9 +48,27 @@ tasks.withType(Test) {
 //Publishing
 group 'mil.army.usace.hec'
 version '1.0-SNAPSHOT'
+publishing {
+    repositories {
+        maven {
+            // Choose whatever name you want
+            name = "GitHubPackages"
+            // The url of the repository, where the artifacts will be published
+            url = "https://maven.pkg.github.com/HydrologicEngineeringCenter/FIRO_WAT_ForecastProcessor"
+            credentials {
+                // The credentials (described in the next section)
+                username = System.getenv("USERNAME")
+                password = System.getenv("TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from components.java
+        }
+    }
 
-
-
+}
 jar {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
