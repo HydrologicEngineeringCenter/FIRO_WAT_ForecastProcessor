@@ -163,17 +163,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
             return "src/test/resources/ensembles.db";
         }
         String runsDir = _computeOptions.getRunDirectory();
-        int realizationNum = _computeOptions.getCurrentRealizationNumber();
-        int lifecycleNum = _computeOptions.getCurrentLifecycleNumber();
-        int eventNum = _computeOptions.getCurrentEventNumber();
-
-        return buildPathToDBFile(runsDir,realizationNum,lifecycleNum,eventNum,DatabaseName);
-
-    }
-
-    public static String buildPathToDBFile(String runsDir,int realNum, int lifecycleNum, int eventNum, String databaseName){
-        return runsDir + "\\" + "realization " + realNum + "\\" +"lifecycle " + lifecycleNum +
-                "\\" + "event " + eventNum + "\\"+ databaseName;
+        String[] splitRunsDir = runsDir.split("\\\\");
+        StringBuilder databasePath = new StringBuilder();
+        for(int i = 0; i<splitRunsDir.length-1;i++ ){
+            databasePath.append(splitRunsDir[i] + "\\");
+        }
+        return databasePath.toString() + DatabaseName;
     }
 
     @Override

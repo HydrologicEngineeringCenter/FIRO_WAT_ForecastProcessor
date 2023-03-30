@@ -60,23 +60,6 @@ class FIRO_WFP_AlternativeTest {
         assertTrue(_alt.compute());
     }
 
-    @Test
-    void buildPathToDBFile(){
-        //arrange
-        String runsDir = "D:\\FIRO\\Evan's Test Data\\RTestTWM";
-        int real = 1;
-        int life = 1;
-        int event = 1;
-        String DatabaseName = "ensembles.db";
-        String expected = "D:\\FIRO\\Evan's Test Data\\RTestTWM\\realization 1\\lifecycle 1\\event 1\\ensembles.db";
-        //act
-        String actual = FIRO_WFP_Alternative.buildPathToDBFile(runsDir,real,life,event,DatabaseName);
-        //assert
-        System.out.println("expected: " + expected);
-        System.out.println("actual: " + actual);
-        assertEquals(actual, expected);
-    }
-
     @AfterEach
     void tearDown() {
 
