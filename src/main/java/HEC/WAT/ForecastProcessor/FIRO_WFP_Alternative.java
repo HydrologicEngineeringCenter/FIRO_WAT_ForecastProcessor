@@ -41,9 +41,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String DatabaseName = "ensembles.db";
-    private static final String DssDatabaseName = "ensembles.dss";
     private hec2.wat.model.ComputeOptions _computeOptions;
-    private List<OutputVariable> _outputVariables;
     //endregion
     //region Constructors
     public FIRO_WFP_Alternative(){
@@ -61,20 +59,20 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
     public List<DataLocation> getInputDataLocations(){
         //construct input data locations.
-        if(_inputDataLocations.isEmpty()){
-            defaultInputDataLocations();
-        }
+//        if(_inputDataLocations.isEmpty()){
+//            defaultInputDataLocations();
+//        }
         return _inputDataLocations;
     }
     public List<DataLocation> getOutputDataLocations(){
         //construct input data locations.
-        if(_outputDataLocations.isEmpty()){
-            defaultOutputDataLocations();
-        }
+//        if(_outputDataLocations.isEmpty()){
+//            defaultOutputDataLocations();
+//        }
         return _outputDataLocations;
     }
     public List<OutputVariable> getOutputVariables(){
-        return _outputVariables;
+        return null;
     }
     @Override
     public String getLogFile() {
@@ -83,12 +81,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     public void setComputeOptions(ComputeOptions opts){
         _computeOptions = opts;
     }
-    public boolean hasOutputVariables(){
-        if (_outputVariables == null || _outputVariables.size() == 0){
-            return false;
-        }
-        return true;
-    }
+    public boolean hasOutputVariables(){ return false;}
     //endregion
     //region Ignored Boilerplate
     @Override
