@@ -108,6 +108,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                         database.write(mcts);
                 }
             }
+            database.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
