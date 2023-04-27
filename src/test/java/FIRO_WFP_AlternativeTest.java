@@ -32,8 +32,8 @@ class FIRO_WFP_AlternativeTest {
 
     @Test
     void saveData() {
-        _alt.getInputDataLocations();
-        _alt.getOutputDataLocations();
+        _alt.defaultInputDataLocations();
+        _alt.defaultOutputDataLocations();
         RmaFile rf = new RmaFile("src/test/resources/savedata.xml");
         assertTrue(_alt.saveData(rf));
     }
