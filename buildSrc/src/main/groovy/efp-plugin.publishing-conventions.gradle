@@ -1,0 +1,31 @@
+// This file defines the default configurations for publishing a subproject to HEC Nexus. Note that each subproject
+// still requires a `publishing` block to actually specify the component that will be published.
+
+plugins {
+    id 'maven-publish'
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username = project.hasProperty('nexusUser') ? "$nexusUser" : "defaultUser"
+                password = project.hasProperty('nexusPassword') ? "$nexusPassword" : "defaultPassword"
+            }
+            afterEvaluate {
+                def wat_releases_url = 'https://www.hec.usace.army.mil/nexus/repository/wat-releases/'
+                def wat_snapshots_url = 'https://www.hec.usace.army.mil/nexus/repository/wat-snapshots/'
+                url = version.toString().endsWith("SNAPSHOT") ? "${wat_snapshots_url}" : "${wat_releases_url}"
+            }
+        }
+    }
+}
+
+def checkForPublishCredentials() {
+    if(!project.hasProperty('nexusUser')) {
+        throw new GradleException('Please set the nexusUser property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PnexusUser= .')
+    }
+    if(!project.hasProperty('nexusPassword')) {
+        throw new GradleException('Please set the nexusPassword property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PnexusPassword= .')
+    }
+}

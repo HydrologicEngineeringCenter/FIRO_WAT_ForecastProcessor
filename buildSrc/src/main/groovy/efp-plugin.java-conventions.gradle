@@ -1,0 +1,30 @@
+plugins {
+    id 'java-library'
+}
+
+compileJava {
+    // options.release = 21
+    sourceCompatibility = 11
+    targetCompatibility = 11
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+dependencies {
+    annotationProcessor(libs.service.annotations)
+    configurations.compileClasspath.extendsFrom(configurations.annotationProcessor)
+
+    /* ---- Test Dependencies ---- */
+    testImplementation(libs.bundles.junit5)
+}
+
+test {
+    useJUnitPlatform()
+}
+
+javadoc {
+    options.addBooleanOption('Xdoclint:none', true)
+}

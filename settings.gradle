@@ -1,3 +1,4 @@
-rootProject.name = 'FIRO_WAT_ForecastProcessor'
-include(':FIRO_TSEnsembles:FIRO_TSEnsembles')
+rootProject.name = 'wat-forecast-processor'
 
+include 'wat-forecast-processor-bom'
+include 'wat-forecast-processor-plugin'

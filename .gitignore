@@ -2,7 +2,7 @@
 /.gradle/
 /.idea/
 /build/
-src/test/resources/savedata.xml.bak
-src/test/resources/savedata.xml
-src/test/resources/ensembles.db
-src/test/resources/ensembles.db
+wat-forecast-processor-plugin/src/test/resources/savedata.xml.bak
+wat-forecast-processor-plugin/src/test/resources/savedata.xml
+wat-forecast-processor-plugin/src/test/resources/ensembles.db
+wat-forecast-processor-plugin/src/test/resources/ensembles.db

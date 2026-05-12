@@ -1,0 +1,31 @@
+plugins {
+    id "efp-plugin.deps-conventions"
+    id "java-platform"
+    id "efp-plugin.publishing-conventions"
+}
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    // WAT Plugin, so start with extending WAT' dependencies
+    api(platform(libs.watbom))
+
+    constraints {
+        // And lock the versions of these libraries that we want to use in
+        // They don't currently specify transitives completely correctly
+        // So this allows us to constrain to the right version.
+        api(libs.dss.ensembles)
+        api(libs.ts.ensembles)
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = "wat-forecast-processor-plugin-bom"
+            from components.javaPlatform
+        }
+    }
+}

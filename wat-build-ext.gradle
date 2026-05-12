@@ -1,0 +1,6 @@
+// implements WAT plugin development environment connection
+includeBuild("$gradle.ext.externalPluginDir") {
+    dependencySubstitution {
+        substitute(module("HEC.WAT.ForecastProcessor:wat-forecast-processor-plugin")).using(project(":wat-forecast-processor-plugin"))
+    }
+}

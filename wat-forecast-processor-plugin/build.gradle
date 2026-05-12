@@ -1,0 +1,92 @@
+plugins {
+    id 'efp-plugin.deps-conventions'
+    id 'efp-plugin.java-conventions'
+    id 'efp-plugin.publishing-conventions'
+}
+
+configurations {
+    winx8664Natives
+
+    // This is an WAT plugin. We need WAT to compile, and to run tests.
+    // We don't want to export WAT as a dependency though when publishing,
+    // because if WAT pulls our artifact in, this can result in bad things
+    // happening. Split it into a separate configuration, and add it to
+    // compile and test (but, importantly, NOT api or implementation!)
+    wat
+    compileOnly.extendsFrom wat
+    testImplementation.extendsFrom wat
+}
+
+dependencies {
+    // The Ensembles libraries don't export their transitive dependencies
+    // 100% correctly. Use a Platform / bill of materials to set a version
+    // constraint, and lock in the correct versions we actually want.
+    api(platform(project(":wat-forecast-processor-bom")))
+
+    // We do want these declared as API, because if WAT picks up this library,
+    // it may not have these ensembles libraries already. They are necessary for
+    // this plugin to work.
+    api(libs.ts.ensembles) {
+        //exclude group: "tech.units"
+    }
+    api(libs.dss.ensembles) {
+        //exclude group: "tech.units"
+    }
+
+    wat(libs.wat) {
+        // Requires an extra repo, and rfp doesn't need it, so skip it
+        exclude group: "org.geotools"
+        //exclude group: "tech.units"
+    }
+    // wat(libs.watbom)
+
+
+    // Heclib uses different versions (rather than classifiers) to specify
+    // platform-ness. Get the version from the catalog, append the platform
+    // tag, apply it to the artifact, and add that as a dependency
+    /*def heclibVersion = libs.versions.heclib.get() + "-win-x86_64"
+    def heclib = libs.heclib.get().copy()
+    heclib.version { it.require(heclibVersion) }
+    winx8664Natives(heclib)
+
+     */
+
+    testImplementation(libs.tech.units)
+}
+/*
+tasks.register("extractNatives", Sync) { syncTask ->
+    syncTask.destinationDir = layout.buildDirectory.dir("natives").get().asFile
+    syncTask.from { configurations.winx8664Natives.collect() { zipTree(it) } }
+}*/
+
+tasks.withType(Test).configureEach { task ->
+    // task.dependsOn(tasks.named("extractNatives"))
+
+    testLogging{
+        test {
+            testLogging {
+                events "PASSED","FAILED", "SKIPPED"
+            }
+        }
+    }
+    jvmArgs ("--enable-preview",
+            "-Djava.library.path=" + layout.buildDirectory.get().dir("natives")
+    )
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes ("WatPluginMainClass": "HEC.WAT.ForecastProcessor.FIRO_WFP_Plugin")
+        //,
+        //            'BuildDate':  new Date().format('yyyyMMddHHmmss').toString())
+    }
+}
+
