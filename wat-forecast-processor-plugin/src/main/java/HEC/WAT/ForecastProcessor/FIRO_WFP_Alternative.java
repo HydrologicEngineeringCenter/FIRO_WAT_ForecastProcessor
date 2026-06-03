@@ -23,6 +23,7 @@ import hec.metrics.MetricCollection;
 import hec.metrics.MetricCollectionTimeSeries;
 import hec.model.OutputVariable;
 import hec2.model.DataLocation;
+import hec2.model.DataLocationType;
 import hec2.model.DssDataLocation;
 import hec2.wat.model.ComputeOptions;
 import hec2.plugin.selfcontained.SelfContainedPluginAlt;
@@ -44,7 +45,7 @@ import java.util.List;
  *
  * @author WatPowerUser
  */
-public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
+public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     //region Fields
     List<DataLocation> _inputDataLocations = new ArrayList<>();
     List<DataLocation> _outputDataLocations = new ArrayList<>();
@@ -58,62 +59,89 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     private static final String DssDatabaseName = "ensembles.dss";
     private hec2.wat.model.ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
+
     //endregion
     //region Constructors
-    public FIRO_WFP_Alternative(){
+    public FIRO_WFP_Alternative() {
         super();
     }
-    public FIRO_WFP_Alternative(String name){
+
+    public FIRO_WFP_Alternative(String name) {
         this();
         setName(name);
     }
+
     //endregion
     //region Getters and Setters
     @Override
     public int getModelCount() {
         return 1;
     }
-    public List<DataLocation> getInputDataLocations(){
+
+    public List<DataLocation> getInputDataLocations() {
         //construct input data locations.
-        if(_inputDataLocations.isEmpty()){
-            defaultInputDataLocations();
-        }
+        //if (_inputDataLocations.isEmpty()) {
+        //    defaultInputDataLocations();
+        //}
         return _inputDataLocations;
     }
-    public List<DataLocation> getOutputDataLocations(){
+
+    public List<DataLocation> getOutputDataLocations() {
         //construct input data locations.
-        if(_outputDataLocations.isEmpty()){
-            defaultOutputDataLocations();
+        //if (_outputDataLocations.isEmpty()) {
+        //    defaultOutputDataLocations();
+        //}
+        // update data locations
+        for (DataLocation odl : _outputDataLocations) {
+            DssDataLocation dssDataLoc = (DssDataLocation) odl;
+            if (_computeOptions != null) {
+                dssDataLoc.set_dssFile(getSimulationFileName());
+                DSSPathname updatedPath = new DSSPathname(dssDataLoc.getDssPath());
+                updatedPath.setFPart(getFpart());
+                odl.setDssPath(updatedPath.toString());
+                dssDataLoc.setModelAlternative(this.getModelAlt());
+                dssDataLoc.setType(DataLocationType.TIME_SERIES);
+            }
         }
         return _outputDataLocations;
     }
-    public List<OutputVariable> getOutputVariables(){
+
+    public List<OutputVariable> getOutputVariables() {
         return _outputVariables;
     }
+
     @Override
     public String getLogFile() {
         return null;
     }
-    public void setComputeOptions(ComputeOptions opts){
+
+    public void setComputeOptions(ComputeOptions opts) {
         _computeOptions = opts;
     }
-    public boolean hasOutputVariables(){
-        if (_outputVariables == null || _outputVariables.size() == 0){
+
+    public boolean hasOutputVariables() {
+        if (_outputVariables == null || _outputVariables.size() == 0) {
             return false;
         }
         return true;
     }
+
     //endregion
     //region Ignored Boilerplate
     @Override
     public boolean isComputable() {
         return true;
     }
-    boolean computeOutputVariables(List<OutputVariable> list) { return true; }
+
+    boolean computeOutputVariables(List<OutputVariable> list) {
+        return true;
+    }
+
     @Override
     public boolean cancelCompute() {
         return false;
     }
+
     //endregion
     @Override
     public boolean compute() {
@@ -130,11 +158,11 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 for (DataLocation outDataLocation : _outputDataLocations) {
                     String className = outDataLocation.getClass().getName();
                     MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries, outDataLocation, className);
-                    outFile.write(condenseMetricsAcrossIssueDates(mcts, outDataLocation, _computeOptions.getFpart(), outFile));
+                    outFile.write(condenseMetricsAcrossIssueDates(mcts, outDataLocation, getFpart(), outFile));
                 }
             }
             outFile.done();
-        } catch (Exception e){
+        } catch (Exception e) {
             // todo: do something better here!
             e.printStackTrace();
         }
@@ -144,11 +172,13 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
 
     // copied from private static in hec.dss.ensembles.DssDatabase
     private static final DateTimeFormatter dssDateFormat = DateTimeFormatter.ofPattern("ddMMMyyyy HHmm");
+
     private static HecTime getHecTime(ZonedDateTime zdt) {
         String dateStr = "";
         dateStr = zdt.format(dssDateFormat);
         return new HecTime(dateStr);
     }
+
     private static ZonedDateTime getZonedDateTime(HecTime time) {
         int hour = time.hour();
         ZoneId timeZone = ZoneId.of("GMT");
@@ -168,6 +198,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     /**
      * This method consolidates a single value MetricCollectionTimeSeries into a single irregular timeseries
      * for use within a reservoir operations model.  This is intended to operate with
+     *
      * @param mcts
      * @param outputLocation
      * @param fPart
@@ -192,10 +223,10 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         // leaving this commented out for now, might be useful in the future.
         // HecTime endTimeStep = _computeOptions.getRunTimeWindow().getEndTime();  // this works, other methods don't.
         // ZonedDateTime simEndTime = getZonedDateTime(endTimeStep);
-        for(ZonedDateTime t : mcts.getIssueDates()){
+        for (ZonedDateTime t : mcts.getIssueDates()) {
             times[i] = getHecTime(t).value();
             MetricCollection mc = mcts.getMetricCollection(t);
-            values[i] =  mc.getValues()[0][0];
+            values[i] = mc.getValues()[0][0];
             i += 1;
             // check if we've gone past the end of the simulation time window, don't export these values
             // this deals with the weird tail produced by the MCTS compute?
@@ -216,24 +247,24 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
 
         // if doing WAT method
         boolean WAT_METHOD = true;
-        if(WAT_METHOD){
-            int[] newTimes = new int[nItems*2];
-            double[] newValues = new double[nItems*2];
+        if (WAT_METHOD) {
+            int[] newTimes = new int[nItems * 2];
+            double[] newValues = new double[nItems * 2];
             int interval = 0;
             int prevTime = times[0];
-            for(int j=0; j < nItems; j++){
-                newTimes[2*j] = times[j];
-                newValues[2*j] = values[j];
-                if(j > 0){ // add our end-of-period value
-                    newTimes[2*j-1] = times[j]-1; // one minute before current time
-                    newValues[2*j-1] = values[j-1]; // previous value
+            for (int j = 0; j < nItems; j++) {
+                newTimes[2 * j] = times[j];
+                newValues[2 * j] = values[j];
+                if (j > 0) { // add our end-of-period value
+                    newTimes[2 * j - 1] = times[j] - 1; // one minute before current time
+                    newValues[2 * j - 1] = values[j - 1]; // previous value
                 }
                 interval = Math.max(interval, times[j] - prevTime); // take largest forecast step
                 prevTime = times[j];
             }
             // set the last value as one "interval" out from the last forecast issue date
-            newTimes[nItems*2-1] = times[nItems-1]+interval-1;
-            newValues[nItems*2-1] = values[nItems-1];
+            newTimes[nItems * 2 - 1] = times[nItems - 1] + interval - 1;
+            newValues[nItems * 2 - 1] = values[nItems - 1];
             // reassign if we're using these
             times = newTimes;
             values = newValues;
@@ -244,7 +275,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         outTSC.times = times;
         outTSC.numberValues = values.length;
         outTSC.startHecTime = new HecTime(times[0]);
-        outTSC.endHecTime = new HecTime(times[times.length-1]);
+        outTSC.endHecTime = new HecTime(times[times.length - 1]);
         ZonedDateTime firstTime = mcts.getIssueDates().get(0);
         outTSC.timeZoneID = firstTime.getZone().getId();
         outTSC.fullName = outPath.toString();
@@ -258,31 +289,29 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
 
     private MetricCollectionTimeSeries computeMetrics(EnsembleTimeSeries ensembleTimeSeries, DataLocation outDataLocation, String classname) throws Exception {
         MetricCollectionTimeSeries mcts = null;
-        switch (classname){
+        switch (classname) {
             case "HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation":
-                MultiComputableDataLocation mcdl = ((MultiComputableDataLocation)outDataLocation);
+                MultiComputableDataLocation mcdl = ((MultiComputableDataLocation) outDataLocation);
                 MultiComputable msc = mcdl.getComputableThing();
-                if(mcdl.isAcrossTime()){
-                     mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(msc);
-                }
-                else{
-                     mcts = ensembleTimeSeries.iterateTracesOfEnsemblesWithMultiComputable(msc);
+                if (mcdl.isAcrossTime()) {
+                    mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithMultiComputable(msc);
+                } else {
+                    mcts = ensembleTimeSeries.iterateTracesOfEnsemblesWithMultiComputable(msc);
                 }
                 break;
 
             case "HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation":
-                SingleComputableDataLocation sdl = ((SingleComputableDataLocation)outDataLocation);
+                SingleComputableDataLocation sdl = ((SingleComputableDataLocation) outDataLocation);
                 SingleComputable sc = sdl.getComputableThing();
                 mcts = ensembleTimeSeries.computeSingleValueSummary(sc);
                 break;
 
             case "HEC.WAT.ForecastProcessor.DataLocations.ComputableDataLocation":
-                ComputableDataLocation cdl = ((ComputableDataLocation)outDataLocation);
+                ComputableDataLocation cdl = ((ComputableDataLocation) outDataLocation);
                 Computable c = cdl.getComputableThing();
-                if(cdl.isAcrossTime()){
+                if (cdl.isAcrossTime()) {
                     mcts = ensembleTimeSeries.iterateAcrossTimestepsOfEnsemblesWithSingleComputable(c);
-                }
-                else{
+                } else {
                     mcts = ensembleTimeSeries.iterateAcrossEnsembleTracesWithSingleComputable(c);
                 }
                 break;
@@ -293,7 +322,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     }
 
     private String getInputDatabaseName() {
-        if(_computeOptions.getRunDirectory() == null) {
+        if (_computeOptions.getRunDirectory() == null) {
             return "src/test/resources/ensembles_by_event.dss";
         }
 
@@ -306,43 +335,43 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         return inputDatabaseName.toString();
     }
 
+    // the following methods are used to catch null _computeOptions when initializing the plugin.
+    private String getSimulationName() {
+        if(_computeOptions == null) return "No Simulation";
+        else return _computeOptions.getSimulationName();
+    }
+    private String getFpart() {
+        if(_computeOptions == null) return super.getModelAlt().getFpart();
+        else return _computeOptions.getFpart();
+    }
+    private String getSimulationFileName() {
+        if(_computeOptions == null) return "wat_simulation.dss";
+        else return _computeOptions.getDssFilename();
+    }
+
     private String getOutputDatabaseName() {
-        if(_computeOptions.getRunDirectory() == null){
+        if (_computeOptions.getRunDirectory() == null) {
             return "src/test/resources/lifecycle_example.dss";
         }
         // resolve to lifecycle DSS file
-        String simFileName = _computeOptions.getDssFilename();
+        String simFileName = getSimulationFileName();
         //Path runDir = FileSystems.getDefault().getPath(_computeOptions.getRunDirectory());
         //Path lifecycleFile = runDir.resolve("realization 1").resolve("lifecycle 1").resolve(simFileName);
         //Path outputDatabaseName = FileSystems.getDefault().getPath(_computeOptions.getRunDirectory()).resolve(lifecycleFile);
         return simFileName; //outputDatbaseName.toString();
     }
 
-    private String getInputOutputDatabaseName() {
-        //First Condition to make sure I can unit test this.
-        if(_computeOptions.getRunDirectory() == null){
-            return "src/test/resources/ensembles.db";
-        }
-        String runsDir = _computeOptions.getRunDirectory();
-        String[] splitRunsDir = runsDir.split("\\\\");
-        StringBuilder databasePath = new StringBuilder();
-        for(int i = 0; i<splitRunsDir.length-1;i++ ){
-            databasePath.append(splitRunsDir[i] + "\\");
-        }
-        return databasePath.toString() + DatabaseName;
-    }
-
     @Override
-    public boolean saveData(RmaFile file){
-        if(file!=null){
+    public boolean saveData(RmaFile file) {
+        if (file != null) {
             Element root = new Element(DocumentRoot);
-            root.setAttribute(AlternativeNameAttribute,getName());
-            root.setAttribute(AlternativeDescriptionAttribute,getDescription());
-            root.setAttribute(AlternativeFilenameAttribute,file.getAbsolutePath());
+            root.setAttribute(AlternativeNameAttribute, getName());
+            root.setAttribute(AlternativeDescriptionAttribute, getDescription());
+            root.setAttribute(AlternativeFilenameAttribute, file.getAbsolutePath());
             saveDataLocations(root, _inputDataLocations);
             saveOutputDataLocations(root, _outputDataLocations);
             Document doc = new Document(root);
-            return writeXMLFile(doc,file);
+            return writeXMLFile(doc, file);
         }
         return false;
     }
@@ -350,8 +379,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
     @Override
     protected void loadOutputDataLocations(Element root, List<DataLocation> outputDataLocations) {
         Element OutputDataLocationsEle = root.getChild(OutputDataLocationParentElement);
-        for ( Object child: OutputDataLocationsEle.getChildren() ){
-            Element outputEle = (Element)child;
+        for (Object child : OutputDataLocationsEle.getChildren()) {
+            Element outputEle = (Element) child;
             //Get the data location type
             String dataLocationtype = outputEle.getAttributeValue("Class");
             switch (dataLocationtype) {
@@ -377,42 +406,126 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
                 default:
                     //None of these.
                     break;
-                }
+            }
         }
     }
 
     @Override
     public boolean loadDocument(org.jdom.Document dcmnt) {
-        if(dcmnt!=null){
+        if (dcmnt != null) {
             org.jdom.Element ele = dcmnt.getRootElement();
-            if(ele==null){
+            if (ele == null) {
                 System.out.println("No root element on the provided XML document.");
                 return false;
             }
-            if(ele.getName().equals(DocumentRoot)){
+            if (ele.getName().equals(DocumentRoot)) {
                 setName(ele.getAttributeValue(AlternativeNameAttribute));
                 setDescription(ele.getAttributeValue(AlternativeDescriptionAttribute));
                 String val = ele.getAttributeValue(AlternativeFilenameAttribute);
                 RmaFile file = new RmaFile(val);
                 setFile(file);
-            }else{
+            } else {
                 System.out.println("XML document root was named " + ele.getName() + " but we expected " + DocumentRoot);
                 return false;
             }
             _inputDataLocations.clear();
             _outputDataLocations.clear();
-            loadDataLocations(ele, _inputDataLocations) ;
-            loadOutputDataLocations(ele, _outputDataLocations );
+            loadDataLocations(ele, _inputDataLocations);
+            loadOutputDataLocations(ele, _outputDataLocations);
             setModified(false);
             return true;
-        }else{
+        } else {
             System.out.println("XML document was null.");
             return false;
         }
     }
 
-    private String GetDssPathnameForDataLocation(String location, String statisticsLabel){
-        return "" + '/' + location + '/' + statisticsLabel + '/' + "" + '/' + "" + '/' + "";
+    private String getDssPathnameForDataLocation(String location, String parameter) {
+        String aPart = "";
+        String bPart = location;
+        String cPart = parameter;
+        String dPart = "";
+        String ePart = this.getTimeStep();
+        String fPart = _computeOptions == null ? this.getModelAlt().getFpart() : _computeOptions.getFpart();
+        // TODO: use DssPathname class!
+        return "/" + aPart + "/" + bPart + '/' + cPart + '/' + dPart + '/' + ePart + '/' + fPart + "/";
+    }
+
+    private String getDssPathnameForDataLocation(String location, String parameter, String subparameter) {
+        return getDssPathnameForDataLocation(location, parameter + "-" + subparameter);
+    }
+
+    /**
+     * Adds the input data location specified and updates the output data locations.
+     *
+     * @param locs input DataLocations
+     */
+    public void addInputDataLocations(List<DataLocation> locs) {
+        addInputDataLocations(locs, true);
+    }
+
+    /**
+     *
+     * @param locs                      input DataLocations
+     * @param updateOutputDataLocations should the default output data locations be created for each input data location?
+     */
+    public void addInputDataLocations(List<DataLocation> locs, boolean updateOutputDataLocations) {
+        setInputDataLocations(locs);
+        if (updateOutputDataLocations) {
+            ArrayList<DataLocation> odls = new ArrayList<>();
+            for (DataLocation idl : locs) {
+                odls.addAll(createDefaultOutputMetrics(idl));
+            }
+            setOutputDataLocations(odls);
+        }
+    }
+
+    /**
+     * Creates a set of default metrics from the input data location given.
+     *
+     * @param inputDataLocation
+     * @return
+     */
+    private List<DataLocation> createDefaultOutputMetrics(DataLocation inputDataLocation) {
+        String locationName = inputDataLocation.getName();
+        String param = inputDataLocation.getParameter();
+        String outputDssFilename = getSimulationFileName();
+        String file = outputDssFilename == null ? "unknown.dss" : outputDssFilename;
+
+        float[] percentilesToCompute = new float[]{.95f, .90f, .75f, .50f, .25f, .10f, .05f};
+        float[] daysToCompute = new float[]{1f, 2f, 3f, 4f, 5f};
+
+        ArrayList<DataLocation> odls = new ArrayList<>();
+        for (float days : daysToCompute) {
+            for (float percentile : percentilesToCompute) {
+                Computable percentileCompute = new PercentilesComputable(percentile);
+                odls.add(createCumulativeOutputDataLocation(percentileCompute, inputDataLocation, days));
+            }
+            Computable meanCompute = new MeanComputable();
+            odls.add(createCumulativeOutputDataLocation(meanCompute, inputDataLocation, days));
+        }
+        return odls;
+    }
+
+    /**
+     * We do this twice in the above method, this standardizes it; DRY.
+     * @param metric
+     * @param inputDataLocation
+     * @param durationDays
+     * @return
+     */
+    private DataLocation createCumulativeOutputDataLocation(Computable metric, DataLocation inputDataLocation, float durationDays){
+        MultiComputable cumulativeComputable = new CumulativeComputable();
+        float[] daysArray = new float[]{durationDays};
+        Computable cumulative = new NDayMultiComputable(cumulativeComputable, daysArray);
+        SingleComputable twoStep = new TwoStepComputable(cumulative, metric, false);
+        String path = getDssPathnameForDataLocation(inputDataLocation.getName(), inputDataLocation.getParameter(), twoStep.StatisticsLabel());
+        String dssFile = getSimulationFileName();
+        SingleComputableDataLocation dl = new SingleComputableDataLocation(path, dssFile, twoStep);
+        dl.setName(inputDataLocation.getName());
+        dl.setParameter(inputDataLocation.getParameter() + "-" + twoStep.StatisticsLabel());
+        dl.setAlternativeName(this.getName());
+        return dl;
     }
 
     public void setInputDataLocations(List<DataLocation> locs) {
@@ -425,51 +538,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt{
         _outputDataLocations.addAll(locs);
     }
 
-    public void setTimeStep(String timeStep)
-    {
-            _timeStep = timeStep;
+    public void setTimeStep(String timeStep) {
+        _timeStep = timeStep;
     }
 
-    public String getTimeStep()
-    {
+    public String getTimeStep() {
         return _timeStep;
     }
 
-    //region Testing Data
-    //These guys are just here for testing. We wouldn't really want default input and output data locations
-    //Use one source of truth
-    public void defaultInputDataLocations() {
-        //create datalocations for each location of interest, so that it can be linked to output from other models.
-        String pathname = GetDssPathnameForDataLocation("FORECAST", "FLOW");
-        String outputDssFilename = _computeOptions.getDssFilename();
-        String file = outputDssFilename == null ? "unknown.dss" : outputDssFilename;
-        DssDataLocation Inflow = new DssDataLocation(file,pathname);
-        _inputDataLocations.add(Inflow);
-
-    }
-    //populates output data locations when they are empty
-    public void defaultOutputDataLocations() {
-        float[] percentilesToCompute = new float[]{.95f,.90f,.75f,.50f,.25f,.10f,.05f};
-        MultiComputable cumulativeComputable = new CumulativeComputable();
-        float[] daysToCompute = new float[]{2f,3f,5f,7f};
-        String outputDssFilename = _computeOptions.getDssFilename();
-        String file = outputDssFilename == null ? "unknown.dss" : outputDssFilename;
-        for( float days : daysToCompute){
-            float[] daysArray = new float[]{days};
-            Computable cumulative = new NDayMultiComputable(cumulativeComputable,daysArray);
-            for( float percentile : percentilesToCompute){
-                Computable percentileCompute = new PercentilesComputable(percentile);
-                SingleComputable twoStep = new TwoStepComputable(cumulative,percentileCompute,false);
-                String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
-                SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
-                _outputDataLocations.add(dl);
-            }
-            Computable meanCompute = new MeanComputable();
-            SingleComputable twoStep = new TwoStepComputable(cumulative,meanCompute,false);
-            String path = GetDssPathnameForDataLocation("",twoStep.StatisticsLabel());
-            SingleComputableDataLocation dl = new SingleComputableDataLocation(path,file,twoStep);
-            _outputDataLocations.add(dl);
-        }
-    }
-    //endregion
 }

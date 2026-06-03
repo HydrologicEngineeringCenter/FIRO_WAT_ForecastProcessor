@@ -226,10 +226,15 @@ public class WfpAltPanel extends AbstractEditorPanel
 			return true;
 		}
 		List<DataLocation> locs = _inputPanel.getDataLocations();
-		alt.setInputDataLocations(locs);
-		locs = _outputPanel.getDataLocations();
-		alt.setOutputDataLocations(locs);
-
+        // TODO: this should check if new input locations need to be added
+        boolean needsOutputAdded = _outputPanel.getDataLocations().isEmpty();
+        // addInputDataLocations has optional boolean that tells it to create output DLs at the same time.
+        // this isn't perfect, but good enough to pre-populate output locations for the first input
+        alt.addInputDataLocations(locs, needsOutputAdded);
+		if(!needsOutputAdded){
+            locs = _outputPanel.getDataLocations();
+            alt.setOutputDataLocations(locs);
+        }
 
 		alt.setTimeStep((String)_timeStepCombo.getSelectedItem());
 		alt.setModified(true);
