@@ -92,6 +92,8 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
         //    defaultOutputDataLocations();
         //}
         // update data locations
+        // cast outputs to DssDataLocations only.
+
         for (DataLocation odl : _outputDataLocations) {
             DssDataLocation dssDataLoc = (DssDataLocation) odl;
             if (_computeOptions != null) {

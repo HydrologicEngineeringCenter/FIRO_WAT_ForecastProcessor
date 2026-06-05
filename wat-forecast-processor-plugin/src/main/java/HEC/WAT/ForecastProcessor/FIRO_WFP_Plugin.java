@@ -10,6 +10,7 @@ import com.rma.factories.NewObjectFactory;
 import hec.model.OutputVariable;
 import hec2.map.GraphicElement;
 import hec2.model.DataLocation;
+import hec2.model.DssDataLocation;
 import hec2.model.ProgramOrderItem;
 import hec2.plugin.action.EditAction;
 import hec2.plugin.action.OutputElement;
@@ -85,9 +86,14 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
         if(DataLocation.INPUT_LOCATIONS == i){
             //input
             return alt.getInputDataLocations();
-        }else{
+        }else {
             //ouput
-            return alt.getOutputDataLocations();
+            // convert to DssDataLocation to avoid giving ResSim a bad DataLocation
+            ArrayList<DataLocation> outs = new ArrayList<>();
+            for (DataLocation odl : alt.getOutputDataLocations()){
+                outs.add(new DssDataLocation(((DssDataLocation)odl).get_dssFile(), odl.getDssPath()));
+            }
+            return outs;
         }
     }
     @Override
