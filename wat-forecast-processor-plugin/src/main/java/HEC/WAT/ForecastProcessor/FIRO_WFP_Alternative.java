@@ -11,6 +11,7 @@ import HEC.WAT.ForecastProcessor.DataLocations.MultiComputableDataLocation;
 import HEC.WAT.ForecastProcessor.DataLocations.SingleComputableDataLocation;
 import com.rma.io.RmaFile;
 // import hec.SqliteDatabase;
+import hec.RecordIdentifier;
 import hec.dss.ensemble.DssDatabase;
 import hec.ensemble.EnsembleTimeSeries;
 import hec.ensemble.stats.*;
@@ -57,7 +58,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
     private static final String DatabaseName = "ensembles.db";
     private static final String DssDatabaseName = "ensembles.dss";
-    private hec2.wat.model.ComputeOptions _computeOptions;
+    private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
 
     //endregion
@@ -148,15 +149,16 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     @Override
     public boolean compute() {
         try {
-            DssDatabase inputDatabase = new DssDatabase(getInputDatabaseName());
             DSSFile outFile = DSS.open(getOutputDatabaseName());
-
             for (DataLocation inputDataLocation : _inputDataLocations) {
-                DssDataLocation inputDataLocDSS = (DssDataLocation) inputDataLocation;
-                String ensembleLoc = inputDataLocDSS.getLinkedToLocation().getName();
-                String ensembleParam = inputDataLocDSS.getLinkedToLocation().getParameter();
-                hec.RecordIdentifier timeSeriesIdentifier = new hec.RecordIdentifier(ensembleLoc, ensembleParam);
+                String ensembleLoc = inputDataLocation.getLinkedToLocation().getName();
+                String ensembleParam = inputDataLocation.getLinkedToLocation().getParameter();
+                String inputDatabaseName = getInputDatabaseName(inputDataLocation);
+                // open input database and read input ensembles
+                DssDatabase inputDatabase = new DssDatabase(inputDatabaseName);
+                RecordIdentifier timeSeriesIdentifier = new RecordIdentifier(ensembleLoc, ensembleParam);
                 EnsembleTimeSeries ensembleTimeSeries = inputDatabase.getEnsembleTimeSeries(timeSeriesIdentifier);
+                // compute for each metric
                 for (DataLocation outDataLocation : _outputDataLocations) {
                     String className = outDataLocation.getClass().getName();
                     MetricCollectionTimeSeries mcts = computeMetrics(ensembleTimeSeries, outDataLocation, className);
@@ -165,10 +167,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
             }
             outFile.done();
         } catch (Exception e) {
-            // todo: do something better here!
+            // super.addComputeErrorMessage("Unable to compute for this alternative.");
             e.printStackTrace();
         }
-
         return true;
     }
 
@@ -209,12 +210,13 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     private TimeSeriesContainer condenseMetricsAcrossIssueDates(MetricCollectionTimeSeries mcts, DataLocation outputLocation, String fPart, DSSFile dss) {
         TimeSeriesContainer outTSC = new TimeSeriesContainer();
         DSSPathname outPath = new DSSPathname(outputLocation.getDssPath());
-        outPath.setBPart(mcts.getTimeSeriesIdentifier().location);
-        String param = mcts.getTimeSeriesIdentifier().parameter;
-        String metric = outputLocation.getName();
-        outTSC.parameter = param;
-        outTSC.subParameter = metric;
-        outPath.setCPart(String.format("%s-%s", param, metric));
+        outPath.setBPart(outputLocation.getName()); //mcts.getTimeSeriesIdentifier().location);
+        String param = outputLocation.getParameter(); //mcts.getTimeSeriesIdentifier().parameter;
+        //String metric = outputLocation.getName();
+        //outTSC.parameter = param;
+        //outTSC.subParameter = metric;
+        //outPath.setCPart(String.format("%s-%s", param, metric));
+        outPath.setCPart(param);
         outPath.setEPart("IR-YEAR");  // irregular because we don't know the interval of the forecasts anywhere here
         outPath.setFPart(fPart);
         int nItems = mcts.getIssueDates().size();
@@ -318,23 +320,37 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
                 }
                 break;
             default:
-                throw new Exception("wtf man.");
+                throw new Exception("DataLocation of class " + classname + " not supported at this time.");
         }
         return mcts;
     }
 
-    private String getInputDatabaseName() {
+    private String getInputDatabaseName(DataLocation idl){
+        if(_computeOptions.isFrmCompute()){
+            return getInputDatabaseNameFRA();
+        } else {
+            String linkedDssFilename = ((DssDataLocation) idl.getLinkedToLocation()).get_dssFile();
+            return getProject().getAbsolutePath(linkedDssFilename);
+        }
+    }
+
+    private String getInputDatabaseNameFRA() {
         if (_computeOptions.getRunDirectory() == null) {
             return "src/test/resources/ensembles_by_event.dss";
         }
-
-        Path runDir = FileSystems.getDefault().getPath(_computeOptions.getRunDirectory());
-        // resolve to event-based DSS output for ensembles
-        String ensembleFilenameTemplate = "syn-fcst-event_%06d.dss";
-        int eventID = _computeOptions.getCurrentEventNumber();
-        String ensembleFilename = String.format(ensembleFilenameTemplate, eventID);
-        Path inputDatabaseName = runDir.getParent().getParent().resolve(ensembleFilename);
-        return inputDatabaseName.toString();
+        if (_computeOptions.isFrmCompute()){
+            // if it is an fra compute, otherwise, get data location DSS
+            Path runDir = FileSystems.getDefault().getPath(_computeOptions.getRunDirectory());
+            // resolve to event-based DSS output for ensembles
+            String ensembleFilenameTemplate = "syn-fcst-event_%06d.dss";
+            int eventID = _computeOptions.getCurrentEventNumber();
+            String ensembleFilename = String.format(ensembleFilenameTemplate, eventID);
+            Path inputDatabaseName = runDir.getParent().getParent().resolve(ensembleFilename);
+            return inputDatabaseName.toString();
+        } else {
+            // else, compute is not FRM compute
+            return "" ;
+        }
     }
 
     // the following methods are used to catch null _computeOptions when initializing the plugin.
@@ -413,9 +429,9 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     }
 
     @Override
-    public boolean loadDocument(org.jdom.Document dcmnt) {
+    public boolean loadDocument(Document dcmnt) {
         if (dcmnt != null) {
-            org.jdom.Element ele = dcmnt.getRootElement();
+            Element ele = dcmnt.getRootElement();
             if (ele == null) {
                 System.out.println("No root element on the provided XML document.");
                 return false;
