@@ -8,10 +8,10 @@ import java.util.ResourceBundle;
 public class WfpMessages {
     public static final String Bundle_Name = FIRO_WFP_PluginI18n.BUNDLE_NAME;
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(Bundle_Name);
-    public static final String Plugin_Name = "CfpPlugin.Name";
-    public static final String Plugin_Description = "CfpPlugin.Description";
-    public static final String Plugin_Short_Name = "CfpPlugin.ShortName";
-	public static final String PLUGIN_EDITOR_TITLE = "CfpPlugin.Editor.Title";
+    public static final String Plugin_Name = "EfpWatPlugin.Name";
+    public static final String Plugin_Description = "EfpWatPlugin.Description";
+    public static final String Plugin_Short_Name = "EfpWatPlugin.ShortName";
+	public static final String PLUGIN_EDITOR_TITLE = "EfpWatPlugin.Editor.Title";
 	public static final String DATALOCATION_PANEL_HEADER_NAME = "HEC.WAT.ForecastProcessor.UI.DataLocationPanel.Header.Name";
 	public static final String DATALOCATION_PANEL_HEADER_PARAMETER = "HEC.WAT.ForecastProcessor.UI.DataLocationPanel.Header.Parameter";
 	public static final String DATALOCATION_PANEL_HEADER_TYPE = "HEC.WAT.ForecastProcessor.UI.DataLocationPanel.Header.DataLocationType";
@@ -29,6 +29,7 @@ public class WfpMessages {
 	public static final String EDITOR_PANEL_TIME_STEP_DEFAULT = "Editor.Panel.TimeStep.Default";
 	public static final String EDITOR_PANEL_INPUT_TITLE = "Editor.Panel.Title.Input";
 	public static final String EDITOR_PANEL_OUTPUT_TITLE = "Editor.Panel.Title.Output";
+    public static final String EDITOR_PANEL_WAT_METHOD_LABEL= "HEC.WAT.ForecastProcessor.UI.DataLocationPanel.WatMethodLabel";
 
     private WfpMessages() {super();}
     public static String getString(String key) {

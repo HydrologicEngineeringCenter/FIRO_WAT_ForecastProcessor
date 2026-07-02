@@ -7,6 +7,7 @@ import hec2.model.DssDataLocation;
 import hec2.plugin.model.ModelAlternative;
 import org.jdom.Element;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -58,5 +59,6 @@ public class ComputableDataLocation extends DssDataLocation {
         }
         return false;
     }
+
 }
 

@@ -7,6 +7,7 @@ package HEC.WAT.ForecastProcessor.UI;/*
  */
 
 
+import HEC.WAT.ForecastProcessor.FIRO_WFP_Alternative;
 import HEC.WAT.ForecastProcessor.FIRO_WFP_PluginI18n;
 import hec.heclib.dss.DSSPathname;
 import hec2.editors.DataLocationUserDefinedFieldEditor;
@@ -253,9 +254,6 @@ public class DataLocationPanel extends RmaJPanel
 		_deleteBtn.setEnabled ( rows != null && rows.length > 0 );
 	}
 
-	/**
-	 * @param inputDls
-	 */
 	public void setDataLocations(List<DataLocation> dataLocs)
 	{
 		_tableModel.setDataLocations(dataLocs);

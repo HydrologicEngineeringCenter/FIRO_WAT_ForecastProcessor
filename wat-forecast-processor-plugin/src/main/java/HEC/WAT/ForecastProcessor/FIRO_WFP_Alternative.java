@@ -56,10 +56,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
     private static final String AlternativeDescriptionAttribute = "Desc";
     private static final String OutputDataLocationParentElement = "OutputDataLocations";
     private static final String AlternativeFilenameAttribute = "AlternativeFilename";
+    private static final String AlternativeWatMethodAttribute = "SteppedForecastOutput";
     private static final String DatabaseName = "ensembles.db";
     private static final String DssDatabaseName = "ensembles.dss";
     private ComputeOptions _computeOptions;
     private List<OutputVariable> _outputVariables;
+    private boolean _useWatMethod;
 
     //endregion
     //region Constructors
@@ -85,6 +87,11 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
         //    defaultInputDataLocations();
         //}
         return _inputDataLocations;
+    }
+
+    public boolean getUseWatMethod() {
+        // returns true if selected
+        return _useWatMethod;
     }
 
     public List<DataLocation> getOutputDataLocations() {
@@ -250,8 +257,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
          */
 
         // if doing WAT method
-        boolean WAT_METHOD = true;
-        if (WAT_METHOD) {
+        if (_useWatMethod) {
             int[] newTimes = new int[nItems * 2];
             double[] newValues = new double[nItems * 2];
             int interval = 0;
@@ -284,7 +290,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
         outTSC.timeZoneID = firstTime.getZone().getId();
         outTSC.fullName = outPath.toString();
         // inst-val for WAT forecast value method, this interpolates nicely to finer timesteps.
-        outTSC.type = WAT_METHOD ? "INST-VAL" : "PER-AVER";
+        outTSC.type = getUseWatMethod() ? "INST-VAL" : "PER-AVER";
         outTSC.units = mcts.getMetricCollection(firstTime).getUnits();
         outTSC.fileName = dss.getFilename();
 
@@ -386,6 +392,7 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
             root.setAttribute(AlternativeNameAttribute, getName());
             root.setAttribute(AlternativeDescriptionAttribute, getDescription());
             root.setAttribute(AlternativeFilenameAttribute, file.getAbsolutePath());
+            root.setAttribute(AlternativeWatMethodAttribute, _useWatMethod ? "true" : "false");
             saveDataLocations(root, _inputDataLocations);
             saveOutputDataLocations(root, _outputDataLocations);
             Document doc = new Document(root);
@@ -417,6 +424,11 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
                     scdl.fromXML(outputEle);
                     outputDataLocations.add(scdl);
                     break;
+                case "hec2.model.DssDataLocation":
+                    DataLocation ddl = new DssDataLocation();
+                    ddl.fromXML(outputEle);
+                    outputDataLocations.add(ddl);
+                    break;
                 case "hec2.model.DataLocation":
                     DataLocation dl = new DataLocation();
                     dl.fromXML(outputEle);
@@ -439,6 +451,12 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
             if (ele.getName().equals(DocumentRoot)) {
                 setName(ele.getAttributeValue(AlternativeNameAttribute));
                 setDescription(ele.getAttributeValue(AlternativeDescriptionAttribute));
+                if(ele.getAttributes().contains(AlternativeWatMethodAttribute)){
+                    _useWatMethod = ele.getAttributeValue(AlternativeWatMethodAttribute).equals("true");
+                } else {
+                    _useWatMethod = false;
+                }
+
                 String val = ele.getAttributeValue(AlternativeFilenameAttribute);
                 RmaFile file = new RmaFile(val);
                 setFile(file);
@@ -448,8 +466,16 @@ public class FIRO_WFP_Alternative extends SelfContainedPluginAlt {
             }
             _inputDataLocations.clear();
             _outputDataLocations.clear();
-            loadDataLocations(ele, _inputDataLocations);
-            loadOutputDataLocations(ele, _outputDataLocations);
+            try {
+                loadDataLocations(ele, _inputDataLocations);
+            } catch(Exception e) {
+                System.out.println("unable to read input data locations:" + e.toString());
+            }
+            try {
+                loadOutputDataLocations(ele, _outputDataLocations);
+            } catch(Exception e) {
+                System.out.println("unable to read output data locations:" + e.toString());
+            }
             setModified(false);
             return true;
         } else {

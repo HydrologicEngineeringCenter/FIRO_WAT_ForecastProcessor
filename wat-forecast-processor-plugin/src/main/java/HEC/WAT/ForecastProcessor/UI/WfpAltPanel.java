@@ -10,6 +10,7 @@ import hec.lang.NamedType;
 import hec2.model.DataLocation;
 import hec2.plugin.model.ModelAlternative;
 import rma.swing.RmaInsets;
+import rma.swing.RmaJCheckBox;
 import rma.swing.RmaJComboBox;
 
 import javax.swing.*;
@@ -40,8 +41,8 @@ public class WfpAltPanel extends AbstractEditorPanel
 	private ModelAlternative _modelAlt;
 	private RmaJComboBox<String> _timeStepCombo;
 	private Vector<String> _timeSteps;
+    private RmaJCheckBox _watMethodCheckbox;
 
-	private ScriptEditor _editor;
 
 	public WfpAltPanel()
 	{
@@ -120,13 +121,40 @@ public class WfpAltPanel extends AbstractEditorPanel
         label.setLabelFor(_timeStepCombo);
         gbc.gridx     = GridBagConstraints.RELATIVE;
         gbc.gridy     = GridBagConstraints.RELATIVE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        // gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx   = 1.0;
         gbc.weighty   = 0.0;
         gbc.anchor    = GridBagConstraints.WEST;
         gbc.fill      = GridBagConstraints.NONE;
         gbc.insets    = RmaInsets.INSETS5505;
         dataLocPanel.add(_timeStepCombo, gbc);
+
+        JLabel watMethodLabel = FIRO_WFP_PluginI18n.getI18n(WfpMessages.EDITOR_PANEL_WAT_METHOD_LABEL).createJLabel();
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = 1;
+        gbc.weightx   = 0.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.WEST;
+        gbc.fill      = GridBagConstraints.NONE;
+        gbc.insets    = RmaInsets.INSETS5505;
+        dataLocPanel.add(watMethodLabel, gbc);
+
+        _watMethodCheckbox = new RmaJCheckBox();
+        //todo - makes this use a EFP alternative instead so we can save the status
+        _watMethodCheckbox.setModifiable(false);
+        _watMethodCheckbox.setEnabled(false);
+        _watMethodCheckbox.setSelected(true); // _modelAlt.getUseWatMethod());
+        watMethodLabel.setLabelFor(watMethodLabel);
+        gbc.gridx     = GridBagConstraints.RELATIVE;
+        gbc.gridy     = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx   = 1.0;
+        gbc.weighty   = 0.0;
+        gbc.anchor    = GridBagConstraints.WEST;
+        gbc.fill      = GridBagConstraints.NONE;
+        gbc.insets    = RmaInsets.INSETS5505;
+        dataLocPanel.add(_watMethodCheckbox, gbc);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         gbc.gridx     = GridBagConstraints.RELATIVE;
@@ -193,7 +221,9 @@ public class WfpAltPanel extends AbstractEditorPanel
 		}
 		else
 		{
-			_timeStepCombo.setSelectedIndex(-1);
+            // default to IR-YEAR unless the user chooses something else.
+			_timeStepCombo.setSelectedItem("IR-YEAR");
+            //_timeStepCombo.setSelectedIndex(-1);
 		}
 		
 		List<DataLocation> inputDls = _alt.getInputDataLocations();

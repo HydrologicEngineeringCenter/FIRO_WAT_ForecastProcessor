@@ -21,6 +21,8 @@ import hec2.wat.model.tracking.OutputPlugin;
 import hec2.wat.plugin.AbstractSelfContainedWatPlugin;
 import hec2.wat.plugin.CreatableWatPlugin;
 import hec2.wat.plugin.WatPluginManager;
+
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,8 +100,9 @@ public class FIRO_WFP_Plugin extends AbstractSelfContainedWatPlugin<FIRO_WFP_Alt
     }
     @Override
     public boolean setDataLocations(ModelAlternative ma, List<DataLocation> list) throws ModelLinkingException {
-        return true;
+        return true; // sure why not?
     }
+    
     @Override
     public boolean compute(ModelAlternative ma) {
         FIRO_WFP_Alternative alt = getAlt(ma);
